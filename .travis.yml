@@ -1,0 +1,71 @@
+branches:
+  only:
+  - master
+env:
+  global:
+    - DOCKER_CLIENT_TIMEOUT="120"
+    - COMPOSE_HTTP_TIMEOUT="120"
+    - UID="2000"
+    - JUPYTERHUB_VER="1.0.0"
+services: 
+- docker
+push: &push
+      before_install:
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get update
+        - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+        - docker version
+      after_success:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker images
+        - |
+          for i in `docker images --format {{.Repository}}:{{.Tag}}`; do
+            if [[ $TRAVIS_EVENT_TYPE == "push" ]]; then 
+              docker push $i;
+            fi
+          done
+alpine: &alpine
+      stage: Build
+      os: linux
+      language: shell
+      script:
+        - docker-compose -f dist/alpine/docker-compose.yml build
+        - docker rmi raphaelguzman/djlab:py${PY_VER}-alpine
+        - docker system prune -f
+      <<: *push
+debian: &debian
+      stage: Build
+      os: linux
+      language: shell
+      script:
+        - docker-compose -f dist/debian/docker-compose.yml build
+        - docker rmi raphaelguzman/djlab:py${PY_VER}-debian
+        - docker system prune -f
+      <<: *push
+jobs:
+  include:
+    - <<: *alpine
+      env:
+      - LABEL: Alpine
+      - PY_VER: 3.8
+    - <<: *alpine
+      env:
+      - LABEL: Alpine
+      - PY_VER: 3.7
+    - <<: *alpine
+      env:
+      - LABEL: Alpine
+      - PY_VER: 3.6
+    - <<: *debian
+      env:
+      - LABEL: Debian
+      - PY_VER: 3.8
+    - <<: *debian
+      env:
+      - LABEL: Debian
+      - PY_VER: 3.7
+    - <<: *debian
+      env:
+      - LABEL: Debian
+      - PY_VER: 3.6
