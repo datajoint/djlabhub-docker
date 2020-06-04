@@ -1,0 +1,14 @@
+{
+    "database.host": null,
+    "database.user": null,
+    "database.password": null,
+    "database.port": 3306,
+    "connection.init_function": null,
+    "database.reconnect": false,
+    "loglevel": "INFO",
+    "safemode": true,
+    "display.limit": 7,
+    "display.width": 14,
+    "display.show_tuple_count": true,
+    "do_unittest": true
+ }
