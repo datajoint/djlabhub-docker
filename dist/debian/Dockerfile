@@ -1,10 +1,10 @@
 ARG PY_VER
 
-from raphaelguzman/djlab:py${PY_VER}-debian as jup_build
+FROM raphaelguzman/djlab:py${PY_VER}-debian as jup_build
 ARG JUPYTERHUB_VER
 
-user root
-run \
+USER root
+RUN \
     apt install git mysql-client jq inotify-tools vim -y && \
     mkdir /home/tutorial && \
     chown -R dja:anaconda /home/tutorial && \
@@ -25,7 +25,7 @@ RUN \
     find /opt/conda/conda-meta -user dja -exec chmod u+rwx,g+rwx,o-rwx "{}" \; && \
     chmod -R o+w /home/dja/.cache
 COPY ./utilities/entrypoint.sh /entrypoint.sh
-user root
+USER root
 RUN chmod +x /entrypoint.sh
 
 # #Squashed Final Image
