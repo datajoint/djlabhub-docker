@@ -58,6 +58,9 @@ EOF
     rm -R /tmp/tutorial
 }
 
+#Set default permission of new files
+umask u+rwx,g+rwx,o-rwx
+
 #Fix UID/GID
 /startup -user=dja -new_uid=$(id -u) -new_gid=$(id -g) -new_user=${JUPYTERHUB_USER}
 
