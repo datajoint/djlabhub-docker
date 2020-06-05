@@ -39,10 +39,10 @@ EOF
     #pip install requirements in root + pipeline
     if [ -f "/home/tutorial/requirements.txt" ]; then
         # pip install --user -r /home/tutorial/requirements.txt
-        pip install -r /home/tutorial/requirements.txt --user --upgrade
+        pip install -r /home/tutorial/requirements.txt --upgrade
     fi
     if [ -f "/home/tutorial/setup.py" ]; then
-        pip install --user --upgrade /home/tutorial
+        pip install /home/tutorial --upgrade 
     fi
     #copy subset
     mkdir /tmp/tutorial
@@ -67,14 +67,14 @@ EOF
 #Post start hook
 run_post_start_jobs
 
-#Install Python dependencies
-if [ -f "$PIP_REQUIREMENTS" ]; then
-    pip install --user -r $PIP_REQUIREMENTS
-fi
-
 #Install Conda dependencies
 if [ -f "$CONDA_REQUIREMENTS" ]; then
     conda install -yc conda-forge --file $CONDA_REQUIREMENTS
+fi
+
+#Install Python dependencies
+if [ -f "$PIP_REQUIREMENTS" ]; then
+    pip install -r $PIP_REQUIREMENTS --upgrade
 fi
 
 #Run command
