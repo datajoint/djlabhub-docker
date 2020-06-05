@@ -23,7 +23,12 @@ RUN \
     # jupyter labextension install @jupyterlab/hub-extension && \
     conda clean -ya && \
     find /opt/conda/conda-meta -user dja -exec chmod u+rwx,g+rwx,o-rwx "{}" \; && \
-    chmod -R o+w /home/dja/.cache
+    chmod -R o+w /home/dja/.cache && \
+    tmp=$(mktemp) && \
+    jq '.properties.defaultViewers.default = {"markdown":"Markdown Preview"}' /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json > "$tmp" && \
+    mv "$tmp" /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json && \
+    chmod u+rwx,g+rwx,o-rwx /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json
+COPY ./utilities/README.md /home/
 COPY ./utilities/entrypoint.sh /entrypoint.sh
 USER root
 RUN chmod +x /entrypoint.sh
@@ -45,6 +50,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /home/.dja
 VOLUME /home/.dja
 VOLUME /home/common
+VOLUME /opt/conda
 VOLUME /tmp/.X11-unix
 EXPOSE 8888
 CMD ["jupyterhub-singleuser"]
