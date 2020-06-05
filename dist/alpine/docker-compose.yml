@@ -11,13 +11,13 @@ services:
     environment:
       - DISPLAY                             # Necessary to allow GUI to route to Docker host
       - JUPYTER_PASSWORD=secret             # Jupyter Notebook login password
+      - JUPYTERHUB_SERVER_NAME=general
+      - JUPYTERHUB_USER=example_user
+      - DJ_TUTORIAL=https://github.com/vathes/playground_tutorial
+      - DJ_TUTORIAL_RELPATH=.
       - DJ_HOST=tutorial-db.datajoint.io
       - DJ_USER=example_user
       - DJ_PASS=example_password
-      - NB_ENV=general
-      - NB_USER=example_user
-      - NB_REPO=https://github.com/vathes/playground_tutorial
-      - NB_REPO_RELPATH=.
       - FILEPATH_FEATURE_SWITCH=TRUE
       - ADAPTED_TYPE_SWITCH=TRUE
     ports:
