@@ -1,0 +1,34 @@
+version: '3.7'
+services:
+  app:
+    build:  # Uncomment to enable local build
+      context: ../..
+      dockerfile: ./dist/debian/Dockerfile
+      args:
+        - BASE_IMAGE_HASH
+        - PY_VER
+        - JUPYTERHUB_VER
+    image: datajoint/djlabhub:${JUPYTERHUB_VER}-py${PY_VER}-debian
+    environment:
+      - DISPLAY  # Necessary to allow GUI to route to Docker host
+      - NEW_USER=dja  # Rename user and adjust HOME directory
+      # - Djlab_JupyterServer_Password=datajoint  # Jupyter login password
+      # - Djlab_JupyterServer_DisplayFilepath=/home/README.md  # Display on login
+      # - Djlab_JupyterServer_SaveOutput=FALSE  # Set if notebook save includes output
+      - Djlabhub_ServerName=general  # Specify the server reference name
+      - Djlabhub_NotebookRepo_Target=https://github.com/guzman-raphael/playground_tutorial  # GitHub repo for reference notebooks
+      # - Djlabhub_NotebookRepo_Subpath=.  # Relative subpath within GitHub repo to be included
+      - DJ_HOST=tutorial-db.datajoint.io  # Specify DataJoint database host
+      - DJ_USER=example_user  # Specify DataJoint database user
+      - DJ_PASS=example_password  # Specify DataJoint database password
+      - FILEPATH_FEATURE_SWITCH=TRUE  # Enable experimental datatype: filepath
+      - ADAPTED_TYPE_SWITCH=TRUE  # Enable experimental datatype: adapted types
+    ports:
+      - 8888:8888
+    command: jupyter lab
+    user: ${HOST_UID}:anaconda  # Necessary to allow GUI to route to Docker host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw  # Necessary to allow GUI to route to Docker host
+      # - ../../config/datajoint_config.json:/usr/local/bin/.datajoint_config.json  # Override default datajoint config for environment
+      # - ../../common:/home/common  # Mount point for common directory between all of user's environments
+      # - ../../home_user:/home/.anaconda  # Mount point for user's HOME directory
