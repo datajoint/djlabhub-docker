@@ -130,7 +130,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: >
-            ${{format('{0}-py{1}-{2}-{3}', matrix.py_ver, matrix.distro, env.PLATFORM_TAG)}}
+            ${{format('{0}-py{1}-{2}-{3}', env.JUPYTERHUB_VER, matrix.py_ver, matrix.distro,
+                      env.PLATFORM_TAG)}}
       - uses: dbhi/qus/action@main
         with:
           targets: aarch64
