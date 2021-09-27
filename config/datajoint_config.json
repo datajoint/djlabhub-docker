@@ -9,6 +9,5 @@
     "safemode": true,
     "display.limit": 7,
     "display.width": 14,
-    "display.show_tuple_count": true,
-    "do_unittest": true
+    "display.show_tuple_count": true
  }

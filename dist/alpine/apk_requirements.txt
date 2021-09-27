@@ -1,0 +1,4 @@
+git
+mysql-client
+inotify-tools
+vim

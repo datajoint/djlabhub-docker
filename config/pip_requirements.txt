@@ -1,2 +1,1 @@
-datajoint==0.12.6b1
-datajoint_connection_hub
+jupyterhub=={{JUPYTERHUB_VER}}

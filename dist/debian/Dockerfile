@@ -1,56 +1,81 @@
+ARG BASE_IMAGE_HASH
 ARG PY_VER
 
-FROM raphaelguzman/djlab:py${PY_VER}-debian as jup_build
+FROM datajoint/djlab:py${PY_VER}-debian-${BASE_IMAGE_HASH} as jup_build
 ARG JUPYTERHUB_VER
-
+# Initialize directories
 USER root
 RUN \
-    apt install git mysql-client jq inotify-tools vim -y && \
-    mkdir /home/tutorial && \
-    chown -R dja:anaconda /home/tutorial && \
-    chmod g+w /home/tutorial && \
-    mkdir /home/common && \
-    chown -R dja:anaconda /home/common && \
-    chmod g+w /home/common
-
-USER dja:anaconda
+	mkdir /home/notebooks && \
+	chown -R anaconda:anaconda /home/notebooks && \
+	chmod g+w /home/notebooks && \
+	mkdir /home/common && \
+	chown -R anaconda:anaconda /home/common && \
+	chmod g+w /home/common
+USER anaconda:anaconda
+# Install jupyterhub client, included utilities, and hide static HOME directory
+COPY --chown=anaconda:anaconda ./dist/debian/apt_requirements.txt \
+    ./config/pip_requirements.txt /tmp/
 RUN \
-    umask u+rwx,g+rwx,o-rwx && \
-    export PY_VER=$(python -c "import sys;print(sys.version)" | head -1 | awk '{print $1}') && \
-    # conda install -yc conda-forge python=$PY_VER jupyterhub=$JUPYTERHUB_VER && \
-    # conda install -yc conda-forge python=$PY_VER nodejs=10.12.0 && \
-    pip install --no-cache-dir jupyterhub==$JUPYTERHUB_VER && \
-    # jupyter labextension install @jupyterlab/hub-extension && \
-    conda clean -ya && \
-    find /opt/conda/conda-meta -user dja -exec chmod u+rwx,g+rwx,o-rwx "{}" \; && \
-    chmod -R o+w /home/dja/.cache && \
-    tmp=$(mktemp) && \
-    jq '.properties.defaultViewers.default = {"markdown":"Markdown Preview"}' /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json > "$tmp" && \
-    mv "$tmp" /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json && \
-    chmod u+rwx,g+rwx,o-rwx /opt/conda/share/jupyter/lab/schemas/@jupyterlab/docmanager-extension/plugin.json
-COPY ./utilities/README.md /home/
-COPY ./utilities/entrypoint.sh /entrypoint.sh
-USER root
-RUN chmod +x /entrypoint.sh
+	umask u+rwx,g+rwx,o-rwx && \
+	sed -ie "s|{{JUPYTERHUB_VER}}|${JUPYTERHUB_VER}|g" "$PIP_REQUIREMENTS" && \
+	# conda install -yc conda-forge python=$PY_VER jupyterhub=$JUPYTERHUB_VER && \
+	# conda install -yc conda-forge python=$PY_VER nodejs=10.12.0 && \
+	export NEW_HOME=/home/.anaconda && \
+	/entrypoint.sh echo "Requirements updated..." && \
+	rm "$APT_REQUIREMENTS" && \
+	rm "$PIP_REQUIREMENTS" && \
+	cp -R $NEW_HOME /tmp/home_template && \
+	conda clean -ya && \
+	find /opt/conda/conda-meta -user anaconda -exec chmod u+rwx,g+rwx,o-rwx "{}" \; && \
+	chmod -R o+w /home/.anaconda/.cache || echo "no cache..."
+ENV HOME /home/.anaconda
+COPY --chown=anaconda:anaconda ./config/README.md /home/
+COPY ./config/datajoint_config.json /usr/local/bin/.datajoint_config.json
+COPY --chown=anaconda:anaconda ./config/djlab_config.yaml $DJLAB_CONFIG
+COPY ./utilities/add_entrypoint.sh /tmp/add_entrypoint.sh
+# Add post start hook and copy over HOME template files on first boot (if mounted)
+USER root:anaconda
+RUN \
+	(cat /tmp/add_entrypoint.sh && cat /entrypoint.sh | \
+		tr '\n' '\r' | \
+		sed \
+			-e "s~#!/bin/sh~~g" \
+			-e "$(echo 's~# Source shell intercept\r\
+				~# Copy over template if HOME empty\r\
+				[ "$(ls -A $HOME)" ] || cp -R /tmp/home_template/. $HOME\r\
+				\# Source shell intercept\r~g' | tr -d '\n' | tr -d '\t')" \
+			-e "$(echo 's~\t# Install Conda dependencies\r\
+				~\t# Post start hook\r\
+				\t[ -z \"$Djlabhub_NotebookRepo_Target\" ] || \
+					run_post_start_jobs\r\
+				\t# Install Conda dependencies\r~g' | \
+					tr -d '\n' | tr -d '\t')" | \
+		tr '\r' '\n') > /tmp/entrypoint.sh && \
+	mv /tmp/entrypoint.sh /entrypoint.sh && \
+	chmod +x /entrypoint.sh && \
+	rm /tmp/add_entrypoint.sh
+USER anaconda:anaconda
 
-# #Squashed Final Image
+# Squashed Final Image
 FROM scratch
 COPY --from=jup_build / /
-RUN chmod 4755 /startup && /startup -user=dja -new_home=/home/.dja
 LABEL maintainerName="Raphael Guzman" \
-      maintainerEmail="raphael@vathes.com" \
-      maintainerCompany="DataJoint"
-USER dja:anaconda
-ENV LANG C.UTF-8
-ENV APT_REQUIREMENTS /apt_requirements.txt
-ENV PIP_REQUIREMENTS /pip_requirements.txt
-ENV CONDA_REQUIREMENTS /conda_requirements.txt
-ENV PATH "/home/.dja/.local/bin:/opt/conda/bin:$PATH"
+	maintainerEmail="raphael@datajoint.com" \
+	maintainerCompany="DataJoint"
+RUN rm -R /home/anaconda
+USER anaconda:anaconda
+ENV HOME /home/.anaconda
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
+ENV APT_REQUIREMENTS /tmp/apt_requirements.txt
+ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
+ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
+ENV DJLAB_CONFIG /tmp/djlab_config.yaml
+ENV PATH /opt/conda/bin:$PATH
 ENTRYPOINT ["/entrypoint.sh"]
-WORKDIR /home/.dja
-VOLUME /home/.dja
+WORKDIR /home/.anaconda
+VOLUME /home/.anaconda
 VOLUME /home/common
-VOLUME /opt/conda
 VOLUME /tmp/.X11-unix
 EXPOSE 8888
 CMD ["jupyterhub-singleuser"]
