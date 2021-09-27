@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'datajoint/djlab'
+project = 'datajoint/djlabhub'
 copyright = '2020, Raphael Guzman'
 author = 'Raphael Guzman'
 
