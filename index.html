@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Documentation for the DataJoint’s DJLab Image &#8212; datajoint/djlabhub 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">datajoint/djlabhub 0.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-for-the-datajoint-s-djlab-image">
+<h1>Documentation for the DataJoint’s DJLab Image<a class="headerlink" href="#documentation-for-the-datajoint-s-djlab-image" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">A docker image optimized for deploying to <a class="reference external" href="https://jupyterhub.readthedocs.io/en/stable/">JupyterHub</a> a <a class="reference external" href="https://jupyterlab.readthedocs.io/en/stable/">JupyterLab</a> environment with <a class="reference external" href="https://github.com/datajoint/datajoint-python">DataJoint Python</a>.</div>
+<div class="line">For more details, have a look at <a class="reference external" href="https://hub.docker.com/r/datajoint/djlabhub">prebuilt images</a>, <a class="reference external" href="https://github.com/datajoint/djlabhub-docker">source</a>, and <a class="reference external" href="https://datajoint.github.io/djlabhub-docker">documentation</a>.</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="launch-locally">
+<h2>Launch Locally<a class="headerlink" href="#launch-locally" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debian">
+<h3>Debian<a class="headerlink" href="#debian" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker-compose -f dist/debian/docker-compose.yaml --env-file config/.env up --build
+</pre></div>
+</div>
+</div>
+<div class="section" id="alpine">
+<h3>Alpine<a class="headerlink" href="#alpine" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker-compose -f dist/alpine/docker-compose.yaml --env-file config/.env up --build
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>TBD</p></li>
+</ul>
+</div>
+<div class="section" id="usage-notes">
+<h2>Usage Notes<a class="headerlink" href="#usage-notes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>TBD</p></li>
+</ul>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>To rebuild and run tests locally, execute the following statements:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span> -a  <span class="c1"># automatically export sourced variables</span>
+. config/.env  <span class="c1"># source config for build and tests</span>
+docker buildx bake -f dist/<span class="si">${</span><span class="nv">DISTRO</span><span class="si">}</span>/docker-compose.yaml --set *.platform<span class="o">=</span><span class="si">${</span><span class="nv">PLATFORM</span><span class="si">}</span> --set *.context<span class="o">=</span>. --load  <span class="c1"># build image</span>
+tests/main.sh  <span class="c1"># run tests</span>
+<span class="nb">set</span> +a  <span class="c1"># disable auto-export behavior for sourced variables</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="base-image">
+<h2>Base Image<a class="headerlink" href="#base-image" title="Permalink to this headline">¶</a></h2>
+<p>Build is a child of <a class="reference external" href="https://datajoint.github.io/djlab-docker/">datajoint/djlab</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation for the DataJoint’s DJLab Image</a><ul>
+<li><a class="reference internal" href="#launch-locally">Launch Locally</a><ul>
+<li><a class="reference internal" href="#debian">Debian</a></li>
+<li><a class="reference internal" href="#alpine">Alpine</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#usage-notes">Usage Notes</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#base-image">Base Image</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">datajoint/djlabhub 0.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Raphael Guzman.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.
+    </div>
+  </body>
+</html>
