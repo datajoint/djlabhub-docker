@@ -1,12 +1,5 @@
 #!/bin/sh
 run_post_start_jobs() {
-	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
-		# Remove files and hidden files
-		rm -R /home/notebooks/* || echo "no files to remove"
-		rm -rf /home/notebooks/.* 2> /dev/null || echo "no hidden files to remove"
-		# Clone reference notebooks
-		git clone $Djlabhub_NotebookRepo_Target /home/notebooks
-	fi
 	# Copy global config
 	if [ ! -z "${DJ_PASS}" ]; then
 		# Handle password since available
@@ -55,6 +48,12 @@ run_post_start_jobs() {
 		done
 	EOF
 	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
+		# Remove files and hidden files
+		rm -R /home/notebooks/* || echo "no files to remove"
+		rm -rf /home/notebooks/.* 2> /dev/null || echo "no hidden files to remove"
+		# Clone reference notebooks
+		git clone $Djlabhub_NotebookRepo_Target /home/notebooks
+		
 		# Pip install requirements from reference notebooks repo
 		if [ -f "/home/notebooks/requirements.txt" ]; then
 			# pip install --user -r /home/notebooks/requirements.txt
