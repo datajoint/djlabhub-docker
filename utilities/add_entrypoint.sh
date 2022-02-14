@@ -1,10 +1,5 @@
 #!/bin/sh
 run_post_start_jobs() {
-	# Remove files and hidden files
-	rm -R /home/notebooks/* || echo "no files to remove"
-	rm -rf /home/notebooks/.* 2> /dev/null || echo "no hidden files to remove"
-	# Clone reference notebooks
-	git clone $Djlabhub_NotebookRepo_Target /home/notebooks
 	# Copy global config
 	if [ ! -z "${DJ_PASS}" ]; then
 		# Handle password since available
@@ -52,24 +47,32 @@ run_post_start_jobs() {
 			fi
 		done
 	EOF
-	# Pip install requirements from reference notebooks repo
-	if [ -f "/home/notebooks/requirements.txt" ]; then
-		# pip install --user -r /home/notebooks/requirements.txt
-		pip install -r /home/notebooks/requirements.txt --upgrade
+	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
+		# Remove files and hidden files
+		rm -R /home/notebooks/* || echo "no files to remove"
+		rm -rf /home/notebooks/.* 2> /dev/null || echo "no hidden files to remove"
+		# Clone reference notebooks
+		git clone $Djlabhub_NotebookRepo_Target /home/notebooks
+		
+		# Pip install requirements from reference notebooks repo
+		if [ -f "/home/notebooks/requirements.txt" ]; then
+			# pip install --user -r /home/notebooks/requirements.txt
+			pip install -r /home/notebooks/requirements.txt --upgrade
+		fi
+		if [ -f "/home/notebooks/setup.py" ]; then
+			pip install /home/notebooks --upgrade 
+		fi
+		# Copy over only subpath
+		mkdir /tmp/notebooks
+		cp -R /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/* /tmp/notebooks
+		cp -r /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/.[^.]* /tmp/notebooks
+		# Remove files and hidden files
+		rm -R /home/notebooks/*
+		rm -rf /home/notebooks/.* 2> /dev/null
+		# Move contents
+		mv /tmp/notebooks/* /home/notebooks
+		mv /tmp/notebooks/.[^.]* /home/notebooks
+		# Remove temp notebooks directory
+		rm -R /tmp/notebooks
 	fi
-	if [ -f "/home/notebooks/setup.py" ]; then
-		pip install /home/notebooks --upgrade 
-	fi
-	# Copy over only subpath
-	mkdir /tmp/notebooks
-	cp -R /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/* /tmp/notebooks
-	cp -r /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/.[^.]* /tmp/notebooks
-	# Remove files and hidden files
-	rm -R /home/notebooks/*
-	rm -rf /home/notebooks/.* 2> /dev/null
-	# Move contents
-	mv /tmp/notebooks/* /home/notebooks
-	mv /tmp/notebooks/.[^.]* /home/notebooks
-	# Remove temp notebooks directory
-	rm -R /tmp/notebooks
 }
