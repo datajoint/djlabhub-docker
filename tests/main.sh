@@ -31,22 +31,22 @@ IMAGE=$(echo $REF | awk -F':' '{print $1}')
 SHELL_CMD_TEMPLATE="docker run --rm -i \$SHELL_CMD_FLAGS $REF \
 	$([ ${DISTRO} == 'debian' ] && echo bash || echo sh) -c"
 # determine reference size
-if [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ]; then
+if [ $DISTRO == alpine ] && [ $PY_VER == '3.10' ]; then
+	SIZE_LIMIT=990
+elif [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ]; then
 	SIZE_LIMIT=702
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.8' ]; then
 	SIZE_LIMIT=661
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.7' ]; then
 	SIZE_LIMIT=669
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.6' ]; then
-	SIZE_LIMIT=595
+elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ]; then
+	SIZE_LIMIT=1210
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.9' ]; then
 	SIZE_LIMIT=940
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ]; then
 	SIZE_LIMIT=893
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ]; then
 	SIZE_LIMIT=896
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.6' ]; then
-	SIZE_LIMIT=822
 fi
 SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.02" | bc)
 # verify size minimal
