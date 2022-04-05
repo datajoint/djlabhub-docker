@@ -45,8 +45,8 @@ RUN \
 				~# Copy over template if HOME empty\r\
 				[ "$(ls -A $HOME)" ] || cp -R /tmp/home_template/. $HOME\r\
 				\# Source shell intercept\r~g' | tr -d '\n' | tr -d '\t')" \
-			-e "$(echo 's~\t# Install Conda dependencies\r\
-				~\t# Post start hook\r\
+			-e "$(echo 's~\t# Install Conda dependencies\r~\
+				\t# Post start hook\r\
 				\t[ -z \"$Djlabhub_NotebookRepo_Target\" ] || \
 					run_post_start_jobs\r\
 				\t# Install Conda dependencies\r~g' | \
