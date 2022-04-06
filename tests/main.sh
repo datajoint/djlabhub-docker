@@ -21,7 +21,10 @@ assert ()
 	fi
 }
 validate () {
-	echo "Placeholder for more integration tests..."
+	assert "system packages installed" "[ $($SHELL_CMD 'eval "$(cat)"' <<-END
+		git version |  cut -d ' ' -f1
+	END
+	) == 'git' ]" $LINENO
 }
 # set image context
 REF=$(eval \
