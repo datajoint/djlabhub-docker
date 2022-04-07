@@ -1,4 +1,3 @@
 git
 default-mysql-client
-inotify-tools
 vim

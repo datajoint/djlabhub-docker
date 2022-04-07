@@ -37,15 +37,7 @@ run_post_start_jobs() {
 	# Start monitoring global config
 	BACKUP_TARGET=~/../common/.${Djlabhub_ServerName}_datajoint_config.json
 	sh - <<-EOF &
-	inotifywait -m ~/.datajoint_config.json |
-		while read path action file; do
-			if [ "\$(echo \$action | grep MODIFY)" ] || \
-					[ "\$(echo \$action | grep CREATE)" ] || \
-					[ "\$(echo \$action | grep MOVE)" ]; then
-				echo "DataJoint global config change detected. Backing up..."
-				cp ~/.datajoint_config.json ${BACKUP_TARGET}
-			fi
-		done
+	otumat watch -f ~/.datajoint_config.json -s ~/utilities/backup.sh "${BACKUP_TARGET}"
 	EOF
 	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
 		# Remove files and hidden files

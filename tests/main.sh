@@ -22,9 +22,13 @@ assert ()
 }
 validate () {
 	assert "system packages installed" "[ $($SHELL_CMD 'eval "$(cat)"' <<-END
-		git version |  cut -d ' ' -f1
+		git --version > /dev/null && \
+		otumat --version > /dev/null && \
+		vim --version > /dev/null && \
+		mysql --version > /dev/null && \
+		echo done
 	END
-	) == 'git' ]" $LINENO
+	) == 'done' ]" $LINENO
 }
 # set image context
 REF=$(eval \
