@@ -16,6 +16,7 @@ USER anaconda:anaconda
 # Install jupyterhub client, included utilities, and hide static HOME directory
 COPY --chown=anaconda:anaconda ./dist/debian/apt_requirements.txt \
     ./config/pip_requirements.txt /tmp/
+COPY ./utilities/backup.sh /backup.sh
 RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	sed -ie "s|{{JUPYTERHUB_VER}}|${JUPYTERHUB_VER}|g" "$PIP_REQUIREMENTS" && \
