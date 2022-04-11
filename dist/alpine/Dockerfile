@@ -15,7 +15,8 @@ RUN \
 USER anaconda:anaconda
 # Install jupyterhub client, included utilities, and hide static HOME directory
 COPY --chown=anaconda:anaconda ./dist/alpine/apk_requirements.txt \
-    ./config/pip_requirements.txt /tmp/
+	./config/pip_requirements.txt /tmp/
+COPY ./utilities/dj_config_backup.sh /usr/local/bin/dj_config_backup.sh
 RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	sed -ie "s|{{JUPYTERHUB_VER}}|${JUPYTERHUB_VER}|g" "$PIP_REQUIREMENTS" && \

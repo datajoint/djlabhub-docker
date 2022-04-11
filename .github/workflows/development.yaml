@@ -9,6 +9,9 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            py_ver: '3.10'
+            platform: linux/amd64
+          - distro: alpine
             py_ver: 3.9
             platform: linux/amd64
           - distro: alpine
@@ -17,8 +20,8 @@ jobs:
           - distro: alpine
             py_ver: 3.7
             platform: linux/amd64
-          - distro: alpine
-            py_ver: 3.6
+          - distro: debian
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -28,9 +31,6 @@ jobs:
             platform: linux/amd64
           - distro: debian
             py_ver: 3.7
-            platform: linux/amd64
-          - distro: debian
-            py_ver: 3.6
             platform: linux/amd64
           # - distro: debian
           #   py_ver: 3.9
@@ -48,7 +48,7 @@ jobs:
       JUPYTERHUB_VER: '1.4.2'
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
-      BASE_IMAGE_HASH: "b3bbe1c"
+      BASE_IMAGE_HASH: "0f0e05f"
     steps:
       - uses: actions/checkout@v2
       - name: Determine platform tag
@@ -83,6 +83,9 @@ jobs:
       matrix:
         include:
           - distro: alpine
+            py_ver: '3.10'
+            platform: linux/amd64
+          - distro: alpine
             py_ver: 3.9
             platform: linux/amd64
           - distro: alpine
@@ -91,8 +94,8 @@ jobs:
           - distro: alpine
             py_ver: 3.7
             platform: linux/amd64
-          - distro: alpine
-            py_ver: 3.6
+          - distro: debian
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -102,9 +105,6 @@ jobs:
             platform: linux/amd64
           - distro: debian
             py_ver: 3.7
-            platform: linux/amd64
-          - distro: debian
-            py_ver: 3.6
             platform: linux/amd64
           # - distro: debian
           #   py_ver: 3.9
@@ -140,13 +140,21 @@ jobs:
           docker load < "${JUPYTERHUB_VER}-py${PY_VER}-${DISTRO}-${PLATFORM_TAG}.tar.gz"
           tests/main.sh
   publish:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push'&&
+        github.ref == 'refs/heads/master' &&
+      (
+        github.repository_owner == 'datajoint' ||
+        github.repository_owner == 'datajoint-company'
+      )
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - distro: alpine
+            py_ver: '3.10'
+            platform: linux/amd64
+          - distro: alpine
             py_ver: 3.9
             platform: linux/amd64
           - distro: alpine
@@ -155,8 +163,8 @@ jobs:
           - distro: alpine
             py_ver: 3.7
             platform: linux/amd64
-          - distro: alpine
-            py_ver: 3.6
+          - distro: debian
+            py_ver: '3.10'
             platform: linux/amd64
           - distro: debian
             py_ver: 3.9
@@ -166,9 +174,6 @@ jobs:
             platform: linux/amd64
           - distro: debian
             py_ver: 3.7
-            platform: linux/amd64
-          - distro: debian
-            py_ver: 3.6
             platform: linux/amd64
           # - distro: debian
           #   py_ver: 3.9
@@ -214,7 +219,12 @@ jobs:
                   && docker push "${IMAGE}:latest" \
               || echo "skipping 'latest' tag..."
   publish-docs:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push'&&
+        github.ref == 'refs/heads/master' &&
+      (
+        github.repository_owner == 'datajoint' ||
+        github.repository_owner == 'datajoint-company'
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

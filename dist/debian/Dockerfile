@@ -15,7 +15,8 @@ RUN \
 USER anaconda:anaconda
 # Install jupyterhub client, included utilities, and hide static HOME directory
 COPY --chown=anaconda:anaconda ./dist/debian/apt_requirements.txt \
-    ./config/pip_requirements.txt /tmp/
+	./config/pip_requirements.txt /tmp/
+COPY ./utilities/dj_config_backup.sh /usr/local/bin/dj_config_backup.sh
 RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	sed -ie "s|{{JUPYTERHUB_VER}}|${JUPYTERHUB_VER}|g" "$PIP_REQUIREMENTS" && \
@@ -45,8 +46,8 @@ RUN \
 				~# Copy over template if HOME empty\r\
 				[ "$(ls -A $HOME)" ] || cp -R /tmp/home_template/. $HOME\r\
 				\# Source shell intercept\r~g' | tr -d '\n' | tr -d '\t')" \
-			-e "$(echo 's~\t# Install Conda dependencies\r\
-				~\t# Post start hook\r\
+			-e "$(echo 's~\t# Install Conda dependencies\r~\
+				\t# Post start hook\r\
 				\t[ -z \"$Djlabhub_NotebookRepo_Target\" ] || \
 					run_post_start_jobs\r\
 				\t# Install Conda dependencies\r~g' | \

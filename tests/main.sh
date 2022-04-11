@@ -21,7 +21,14 @@ assert ()
 	fi
 }
 validate () {
-	echo "Placeholder for more integration tests..."
+	assert "system packages installed" "[ $($SHELL_CMD 'eval "$(cat)"' <<-END
+		git --version > /dev/null && \
+		otumat --version > /dev/null && \
+		vim --version > /dev/null && \
+		mysql --version > /dev/null && \
+		echo done
+	END
+	) == 'done' ]" $LINENO
 }
 # set image context
 REF=$(eval \
@@ -31,22 +38,22 @@ IMAGE=$(echo $REF | awk -F':' '{print $1}')
 SHELL_CMD_TEMPLATE="docker run --rm -i \$SHELL_CMD_FLAGS $REF \
 	$([ ${DISTRO} == 'debian' ] && echo bash || echo sh) -c"
 # determine reference size
-if [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ]; then
-	SIZE_LIMIT=702
+if [ $DISTRO == alpine ] && [ $PY_VER == '3.10' ]; then
+	SIZE_LIMIT=991
+elif [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ]; then
+	SIZE_LIMIT=723
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.8' ]; then
-	SIZE_LIMIT=661
+	SIZE_LIMIT=682
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.7' ]; then
-	SIZE_LIMIT=669
-elif [ $DISTRO == alpine ] && [ $PY_VER == '3.6' ]; then
-	SIZE_LIMIT=595
+	SIZE_LIMIT=693
+elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ]; then
+	SIZE_LIMIT=1210
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.9' ]; then
-	SIZE_LIMIT=940
+	SIZE_LIMIT=962
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ]; then
-	SIZE_LIMIT=893
+	SIZE_LIMIT=915
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ]; then
-	SIZE_LIMIT=896
-elif [ $DISTRO == debian ] && [ $PY_VER == '3.6' ]; then
-	SIZE_LIMIT=822
+	SIZE_LIMIT=912
 fi
 SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.02" | bc)
 # verify size minimal
