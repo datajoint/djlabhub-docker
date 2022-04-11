@@ -37,7 +37,7 @@ run_post_start_jobs() {
 	# Start monitoring global config
 	BACKUP_TARGET=~/../common/.${Djlabhub_ServerName}_datajoint_config.json
 	sh - <<-EOF &
-	otumat watch -f ~/.datajoint_config.json -s ~/utilities/backup.sh "${BACKUP_TARGET}"
+	otumat watch -f ~/.datajoint_config.json -s dj_config_backup.sh "${BACKUP_TARGET}"
 	EOF
 	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
 		# Remove files and hidden files
