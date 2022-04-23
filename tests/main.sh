@@ -55,7 +55,7 @@ elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ]; then
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ]; then
 	SIZE_LIMIT=912
 fi
-SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.02" | bc)
+SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.10" | bc)
 # verify size minimal
 SIZE=$(docker images --filter "reference=$REF" --format "{{.Size}}" | awk -F'MB' '{print $1}')
 assert "minimal footprint" "(( $(echo "$SIZE <= $SIZE_LIMIT" | bc -l) ))" $LINENO
