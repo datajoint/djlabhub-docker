@@ -31,7 +31,15 @@ Features
 Usage Notes
 ***********
 
-- TBD
+- To make files and notebooks available within the image:
+
+   - Add the necessary files to a publicly available github repository.
+   - Set the environment variable ``Djlabhub_NotebookRepo_Target`` to the repository url containing your files.
+- To use files and notebooks from a subpath of a github repository:
+
+   - Select the correct repository as above.
+   - Set the environment variable ``Djlabhub_NotebookRepo_Subpath`` to path to your files from the base of the repository.
+   
 
 Testing
 *******
