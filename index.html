@@ -61,8 +61,23 @@
 </div>
 <div class="section" id="usage-notes">
 <h2>Usage Notes<a class="headerlink" href="#usage-notes" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>TBD</p></li>
+<ul>
+<li><p>To make files and notebooks available within the image:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Add the necessary files to a publicly available github repository.</p></li>
+<li><p>Set the environment variable <code class="docutils literal notranslate"><span class="pre">Djlabhub_NotebookRepo_Target</span></code> to the repository url containing your files.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>To use files and notebooks from a subpath of a github repository:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Select the correct repository as above.</p></li>
+<li><p>Set the environment variable <code class="docutils literal notranslate"><span class="pre">Djlabhub_NotebookRepo_Subpath</span></code> to path to your files from the base of the repository.</p></li>
+</ul>
+</div></blockquote>
+</li>
 </ul>
 </div>
 <div class="section" id="testing">
