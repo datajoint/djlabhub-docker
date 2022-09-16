@@ -48,7 +48,7 @@ jobs:
       JUPYTERHUB_VER: '1.4.2'
       DOCKER_CLIENT_TIMEOUT: "120"
       COMPOSE_HTTP_TIMEOUT: "120"
-      BASE_IMAGE_HASH: "b980d46"
+      BASE_IMAGE_HASH: "8121b5d"
     steps:
       - uses: actions/checkout@v2
       - name: Determine platform tag
