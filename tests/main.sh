@@ -39,21 +39,21 @@ SHELL_CMD_TEMPLATE="docker run --rm -i \$SHELL_CMD_FLAGS $REF \
 	$([ ${DISTRO} == 'debian' ] && echo bash || echo sh) -c"
 # determine reference size
 if [ $DISTRO == alpine ] && [ $PY_VER == '3.10' ]; then
-	SIZE_LIMIT=991
+	SIZE_LIMIT=1402
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.9' ]; then
-	SIZE_LIMIT=723
+	SIZE_LIMIT=1402
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.8' ]; then
-	SIZE_LIMIT=682
+	SIZE_LIMIT=1402
 elif [ $DISTRO == alpine ] && [ $PY_VER == '3.7' ]; then
-	SIZE_LIMIT=693
+	SIZE_LIMIT=1402
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.10' ]; then
-	SIZE_LIMIT=1210
+	SIZE_LIMIT=1650
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.9' ]; then
-	SIZE_LIMIT=962
+	SIZE_LIMIT=1650
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.8' ]; then
-	SIZE_LIMIT=915
+	SIZE_LIMIT=1650
 elif [ $DISTRO == debian ] && [ $PY_VER == '3.7' ]; then
-	SIZE_LIMIT=912
+	SIZE_LIMIT=1650
 fi
 SIZE_LIMIT=$(echo "scale=4; $SIZE_LIMIT * 1.10" | bc)
 # verify size minimal
