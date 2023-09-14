@@ -48,7 +48,7 @@ RUN \
 				\# Source shell intercept\r~g' | tr -d '\n' | tr -d '\t')" \
 			-e "$(echo 's~\t# Install Conda dependencies\r~\
 				\t# Post start hook\r\
-				\t[ -z \"$Djlabhub_NotebookRepo_Target\" ] || \
+				\t[ -z \"$DJLABHUB_REPO_TARGET\" ] || \
 					run_post_start_jobs\r\
 				\t# Install Conda dependencies\r~g' | \
 					tr -d '\n' | tr -d '\t')" | \

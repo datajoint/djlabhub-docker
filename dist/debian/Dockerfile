@@ -14,14 +14,14 @@ RUN \
 	chmod g+w /home/common
 USER anaconda:anaconda
 # Install jupyterhub client, included utilities, and hide static HOME directory
-COPY --chown=anaconda:anaconda ./dist/debian/apt_requirements.txt \
-	./config/pip_requirements.txt /tmp/
+COPY --chown=anaconda:anaconda \
+	./dist/debian/apt_requirements.txt \
+	./config/pip_requirements.txt \
+	/tmp/
 COPY ./utilities/dj_config_backup.sh /usr/local/bin/dj_config_backup.sh
 RUN \
 	umask u+rwx,g+rwx,o-rwx && \
 	sed -ie "s|{{JUPYTERHUB_VER}}|${JUPYTERHUB_VER}|g" "$PIP_REQUIREMENTS" && \
-	# conda install -yc conda-forge python=$PY_VER jupyterhub=$JUPYTERHUB_VER && \
-	# conda install -yc conda-forge python=$PY_VER nodejs=10.12.0 && \
 	export NEW_HOME=/home/.anaconda && \
 	/entrypoint.sh echo "Requirements updated..." && \
 	rm "$APT_REQUIREMENTS" && \
@@ -33,7 +33,7 @@ RUN \
 ENV HOME /home/.anaconda
 COPY --chown=anaconda:anaconda ./config/README.md /home/
 COPY ./config/datajoint_config.json /usr/local/bin/.datajoint_config.json
-COPY --chown=anaconda:anaconda ./config/djlab_config.yaml $DJLAB_CONFIG
+# COPY ./config/jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 COPY ./utilities/add_entrypoint.sh /tmp/add_entrypoint.sh
 # Add post start hook and copy over HOME template files on first boot (if mounted)
 USER root:anaconda
@@ -48,7 +48,7 @@ RUN \
 				\# Source shell intercept\r~g' | tr -d '\n' | tr -d '\t')" \
 			-e "$(echo 's~\t# Install Conda dependencies\r~\
 				\t# Post start hook\r\
-				\t[ -z \"$Djlabhub_NotebookRepo_Target\" ] || \
+				\t[ -z \"$DJLABHUB_REPO_TARGET\" ] || \
 					run_post_start_jobs\r\
 				\t# Install Conda dependencies\r~g' | \
 					tr -d '\n' | tr -d '\t')" | \
@@ -71,7 +71,6 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV APT_REQUIREMENTS /tmp/apt_requirements.txt
 ENV PIP_REQUIREMENTS /tmp/pip_requirements.txt
 ENV CONDA_REQUIREMENTS /tmp/conda_requirements.txt
-ENV DJLAB_CONFIG /tmp/djlab_config.yaml
 ENV PATH /opt/conda/bin:$PATH
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /home/.anaconda

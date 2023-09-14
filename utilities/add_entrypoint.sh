@@ -12,8 +12,8 @@ run_post_start_jobs() {
 			~/.datajoint_config.json
 	elif [ -z "${DJ_PASS}" ] && [ ! -f "~/.datajoint_config.json" ]; then
 		# Password may be unset but config has not been initialized
-		rm ~/../common/.${Djlabhub_ServerName}_datajoint_config.json || \
-			echo "No ${Djlabhub_ServerName} datajoint config backup detected"
+		rm ~/../common/.${DJLABHUB_SERVERNAME}_datajoint_config.json || \
+			echo "No ${DJLABHUB_SERVERNAME} datajoint config backup detected"
 		cp /usr/local/bin/.datajoint_config.json ~/
 		sed -i "s|\"database.host\": null|\"database.host\": \"${DJ_HOST}\"|g" \
 			~/.datajoint_config.json
@@ -33,18 +33,18 @@ run_post_start_jobs() {
 			fi
 		done
 	fi
-	cp ~/.datajoint_config.json ~/../common/.${Djlabhub_ServerName}_datajoint_config.json
+	cp ~/.datajoint_config.json ~/../common/.${DJLABHUB_SERVERNAME}_datajoint_config.json
 	# Start monitoring global config
-	BACKUP_TARGET=~/../common/.${Djlabhub_ServerName}_datajoint_config.json
+	BACKUP_TARGET=~/../common/.${DJLABHUB_SERVERNAME}_datajoint_config.json
 	sh - <<-EOF &
 	otumat watch -f ~/.datajoint_config.json -s dj_config_backup.sh "${BACKUP_TARGET}"
 	EOF
-	if [ ! -z "${Djlabhub_NotebookRepo_Target}" ]; then
+	if [ ! -z "${DJLABHUB_REPO_TARGET}" ]; then
 		# Remove files and hidden files
 		rm -R /home/notebooks/* || echo "no files to remove"
 		rm -rf /home/notebooks/.* 2> /dev/null || echo "no hidden files to remove"
 		# Clone reference notebooks
-		git clone $Djlabhub_NotebookRepo_Target /home/notebooks
+		git clone $DJLABHUB_REPO_TARGET /home/notebooks
 		
 		# Pip install requirements from reference notebooks repo
 		if [ -f "/home/notebooks/requirements.txt" ]; then
@@ -56,8 +56,8 @@ run_post_start_jobs() {
 		fi
 		# Copy over only subpath
 		mkdir /tmp/notebooks
-		cp -R /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/* /tmp/notebooks
-		cp -r /home/notebooks/${Djlabhub_NotebookRepo_Subpath}/.[^.]* /tmp/notebooks
+		cp -R /home/notebooks/${DJLABHUB_REPO_TARGET_SUBPATH}/* /tmp/notebooks
+		cp -r /home/notebooks/${DJLABHUB_REPO_TARGET_SUBPATH}/.[^.]* /tmp/notebooks
 		# Remove files and hidden files
 		rm -R /home/notebooks/*
 		rm -rf /home/notebooks/.* 2> /dev/null
