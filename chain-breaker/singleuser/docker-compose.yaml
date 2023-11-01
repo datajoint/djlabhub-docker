@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  app:
+  singleuser:
     build:
       context: .
       dockerfile: Dockerfile
@@ -16,3 +16,6 @@ services:
       - ./config/before_start_hook.sh:/usr/local/bin/before-notebook.d/before_start_hook.sh
       - ./config/jupyter_server_config.py:/etc/jupyter/jupyter_server_config.py
       - ./config/jupyter_jupyterlab_server_config.py:/etc/jupyter/jupyter_jupyterlab_server_config.py
+  djlab:
+    extends: singleuser
+    image: datajoint/djlab:py${PYTHON_VERSION}
