@@ -8,6 +8,7 @@ Pro
 - Provide simpler way for mainteners to manage system dependencies and for users to install packages
 - Provide a way to config jupyter through environment variables
 - This can be used as jupyter lab, so we can archive djlab-docker and only focus on this repo
+- Add jupyterhub docker for single user image testing at local
 
 Con
 - Username if jovyan by default, consider this is a minor issue, since it's only visible in the terminal
