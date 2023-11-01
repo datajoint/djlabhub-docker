@@ -10,7 +10,7 @@ RUN \
     # Add startup hook
     && cp /tmp/config/before_start_hook.sh /usr/local/bin/before-notebook.d/ \
     && chmod +x /usr/local/bin/before-notebook.d/before_start_hook.sh \
-    # Add jupyterhub_config
+    # Add jupyter*config*.py
     && cp /tmp/config/jupyter*config*.py /etc/jupyter/
 
 USER ${NB_UID}
