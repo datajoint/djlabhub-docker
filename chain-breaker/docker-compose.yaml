@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION
+        - JUPYTERHUB_VERSION
+    image: datajoint/djlabhub:${JUPYTERHUB_VERSION}-py${PYTHON_VERSION}
+    container_name: djlabhub
+    env_file: .env
+    ports:
+      - $JUPYTER_SERVER_APP_PORT:$JUPYTER_SERVER_APP_PORT
+    volumes:
+      - ./config/before_start_hook.sh:/usr/local/bin/before-notebook.d/before_start_hook.sh
+      - ./config/jupyter_server_config.py:/etc/jupyter/jupyter_server_config.py
+      - ./config/jupyter_jupyterlab_server_config.py:/etc/jupyter/jupyter_jupyterlab_server_config.py
+      - ./config/jupyterhub_config.py:/etc/jupyter/jupyterhub_config.py
