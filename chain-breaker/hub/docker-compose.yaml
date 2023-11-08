@@ -10,6 +10,7 @@ services:
     container_name: djlabhub-hub
     user: root
     env_file: .env
+    # network to connect the hub and singleusers
     networks:
       - jupyterhub_network
     environment:
