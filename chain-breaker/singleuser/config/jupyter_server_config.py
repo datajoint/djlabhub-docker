@@ -4,7 +4,7 @@ import hashlib
 import random
 import json
 
-# Configuration file for jupyter-server.
+# Configuration file for jupyter-server. https://jupyter-server.readthedocs.io/en/latest/other/full-config.html#other-full-config
 
 # c = get_config()  # noqa
 from traitlets.config import Config

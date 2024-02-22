@@ -1,7 +1,7 @@
 import os
 import pwd
 
-# Configuration file for lab. https://jupyterlab-server.readthedocs.io/en/latest/api/app-config.html
+# Configuration file for notebook. https://jupyter-notebook.readthedocs.io/en/5.7.4/config.html
 
 # c = get_config()  # noqa
 from traitlets.config import Config
