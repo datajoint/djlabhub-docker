@@ -18,4 +18,5 @@ services:
       - ./config/jupyter_jupyterlab_server_config.py:/etc/jupyter/jupyter_jupyterlab_server_config.py
   djlab:
     extends: singleuser
+    container_name: djlab
     image: datajoint/djlab:py${PYTHON_VERSION}
