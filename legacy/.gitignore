@@ -1,0 +1,6 @@
+.vscode
+*.tar.gz
+docs/_build
+sphinx-validator.yaml
+common
+home_user

@@ -13,7 +13,6 @@ RUN \
     # Add jupyter*config*.py
     && cp /tmp/config/jupyter*config*.py /etc/jupyter/
 
-USER ${NB_UID}
 ARG PYTHON_VERSION
 RUN \
     # remove default work directory

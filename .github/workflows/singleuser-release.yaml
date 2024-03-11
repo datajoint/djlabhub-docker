@@ -1,0 +1,28 @@
+name: singleuser-relase-wip
+on:
+  workflow_dispatch:
+    inputs:
+      jupyterhub_version:
+        required: true
+        default: '4.0.2'
+        type: choice
+        options:
+          - '4.0.2'
+          - '1.4.2'
+jobs:
+  release-image:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # following python version end of life: https://devguide.python.org/versions/
+          - py_ver: '3.10'
+          - py_ver: '3.9'
+          - py_ver: '3.8'
+    env:
+      PY_VER: ${{matrix.py_ver}}
+      JUPYTERHUB_VER: ${{github.event.inputs.jupyterhub_version}}
+    steps:
+      - uses: actions/checkout@v4
+      # TODO - use docker build action
+      # TODO - use conventional commit action to make release and changelog
