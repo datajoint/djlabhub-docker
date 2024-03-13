@@ -73,7 +73,10 @@ c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.JupyterHub.hub_ip = ""
 
 c.DockerSpawner.network_name = os.getenv("DOCKER_NETWORK_NAME", "jupyterhub_network")
-
+c.DockerSpawner.start_timeout = 60
+# https://github.com/jupyterhub/jupyterhub/issues/2913#issuecomment-580535422
+c.Spawner.http_timeout = 60
+c.Spawner.start_timeout = 60
 c.DockerSpawner.container_image = "datajoint/djlabhub:singleuser-4.0.2-py3.10-qa"
 
 c.DockerSpawner.environment = {
