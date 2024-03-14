@@ -3,7 +3,7 @@
 sudo apt update
 
 # Install
-sudo apt-get install mysql-client -y --no-install-recommends
+sudo apt-get install mysql-client gcc -y --no-install-recommends
 sudo apt-get clean
 rm -rf /var/lib/apt/lists/*
 
