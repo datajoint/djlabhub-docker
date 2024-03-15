@@ -29,22 +29,24 @@ user = [u for u in pwd.getpwall() if u.pw_uid == os.getuid()][0]
 #    - null: jupyterhub.auth.NullAuthenticator
 #    - pam: jupyterhub.auth.PAMAuthenticator
 #  Default: 'jupyterhub.auth.PAMAuthenticator'
-c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
+# c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
 
-# ## TODO - callback_url needs to enable ssl
-# c.JupyterHub.authenticator_class = "oauthenticator.generic.GenericOAuthenticator"
-# c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
-# c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
-# c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
-# c.GenericOAuthenticator.authorize_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/auth"
-# c.GenericOAuthenticator.token_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/token"
-# c.GenericOAuthenticator.userdata_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/userinfo"
-# c.GenericOAuthenticator.login_service = "Datajoint"
-# c.GenericOAuthenticator.username_claim = "preferred_username"
-# c.GenericOAuthenticator.enable_auth_state = True
-# c.GenericOAuthenticator.scope = ["openid"]
-# c.GenericOAuthenticator.claim_groups_key = "groups"
-# c.GenericOAuthenticator.admin_groups = ["datajoint"]
+## TODO - callback_url needs to enable ssl
+c.JupyterHub.ssl_key = '/etc/letsencrypt/live/fakeservices.datajoint.io/privkey.pem'
+c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullchain.pem'
+c.JupyterHub.authenticator_class = "oauthenticator.generic.GenericOAuthenticator"
+c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
+c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
+c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
+c.GenericOAuthenticator.authorize_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/auth"
+c.GenericOAuthenticator.token_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/token"
+c.GenericOAuthenticator.userdata_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/userinfo"
+c.GenericOAuthenticator.login_service = "Datajoint"
+c.GenericOAuthenticator.username_claim = "preferred_username"
+c.GenericOAuthenticator.enable_auth_state = True
+c.GenericOAuthenticator.scope = ["openid"]
+c.GenericOAuthenticator.claim_groups_key = "groups"
+c.GenericOAuthenticator.admin_groups = ["datajoint"]
 
 ## The class to use for spawning single-user servers.
 #
@@ -95,3 +97,15 @@ c.DockerSpawner.environment = {
     "JUPYTER_FILE_CONTENTS_MANAGER_ROOT_DIR": "/home/jovyan",
     "JUPYTER_YDOCEXTENSION_DISABLE_RTC": "TRUE",
 }
+
+# https://github.com/jupyterhub/jupyterhub/issues/3588#issuecomment-1045064784
+# c.JupyterHub.load_roles = [
+#     {
+#         'name': 'server',
+#         'scopes': ['inherit', "access:servers!user", "read:users:activity!user", "users:activity!user", "admin:auth_state!user"]
+#     },
+#     {
+#         'name': 'user',
+#         'scopes': ["self", "admin:auth_state!user"],
+#     }
+# ]
