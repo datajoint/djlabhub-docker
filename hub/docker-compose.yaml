@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  hub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - JUPYTERHUB_VERSION
+    image: datajoint/djlabhub:hub-${JUPYTERHUB_VERSION}
+    container_name: djlabhub-hub
+    user: root
+    env_file: .env
+    # network to connect the hub and singleusers
+    networks:
+      - jupyterhub_network
+    environment:
+      - DOCKER_NETWORK_NAME=jupyterhub_network
+    command: jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+    ports:
+      - 8000:8000
+    volumes:
+      - ./config/jupyterhub_config.py:/etc/jupyterhub/jupyterhub_config.py
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  jupyterhub_network:
+    name: jupyterhub_network
+    driver: bridge
+
