@@ -139,7 +139,7 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             kw = dict(verify=False)
         return jwt.decode(token, algorithms='RS256', **kw)
 
-    def get_roles_for_token(self, token) -> Set[str]:
+    def get_roles_for_token(self, token) -> set[str]:
         decoded_token = self._decode_token(token)
         try:
             return set(decoded_token["resource_access"]["account"]["roles"])
@@ -190,7 +190,6 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             return None
         user['auth_state']['exchanged_tokens'] = self._exchange_tokens(user['auth_state']['access_token'])
         # user['admin'] = self._get_admin_from_roles(user['auth_state']['access_token'])
-        user['admin'] = True
         self.log.info("Authentication Successful for user: %s, admin: %s" % (user['name'], user['admin']))
         return user
 
@@ -198,7 +197,7 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
         """
         Check if the user has the admin role
         """
-        user_roles: Set[str] = self.get_roles_for_token(token)
+        user_roles: set[str] = self.get_roles_for_token(token)
         if not self._validate_roles(user_roles):
             return None
 

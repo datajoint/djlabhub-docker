@@ -59,14 +59,15 @@ c.KeyCloakAuthenticator.oauth_callback_url = 'https://127.0.0.1:8000/hub/oauth_c
 c.KeyCloakAuthenticator.oidc_issuer = 'https://keycloak-qa.datajoint.io/realms/datajoint'
 
 # If you need to set a different scope, like adding the offline option for longer lived refresh token
-c.KeyCloakAuthenticator.scope = ['profile', 'email', 'offline_access', 'openid']
+# c.KeyCloakAuthenticator.scope = ['profile', 'email', 'offline_access']
+c.KeyCloakAuthenticator.scope = ["openid"]
 # Only allow users with this specific roles (none, to allow all)
 c.KeyCloakAuthenticator.accepted_roles = set()
 # Specify the role to set a user as admin
-# c.KeyCloakAuthenticator.admin_role = 'datajoint'
+c.KeyCloakAuthenticator.admin_role = 'datajoint'
 c.KeyCloakAuthenticator.admin_groups = ["datajoint"]
 # Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
-# c.KeyCloakAuthenticator.exchange_tokens = ['eos-service', 'cernbox-service']
+c.KeyCloakAuthenticator.exchange_tokens = []
 
 # If your authenticator needs extra configurations, set them in the pre-spawn hook
 def pre_spawn_hook(authenticator, spawner, auth_state):
