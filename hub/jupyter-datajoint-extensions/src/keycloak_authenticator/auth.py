@@ -139,14 +139,13 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             kw = dict(verify=False)
         return jwt.decode(token, algorithms='RS256', **kw)
 
-    def get_roles_for_token(self, token):
+    def get_roles_for_token(self, token) -> Set[str]:
         decoded_token = self._decode_token(token)
-        return set(
-            decoded_token.\
-               get('resource_access', {'app': ''}).\
-               get(self.client_id, {'roles_list': ''}).\
-               get('roles', 'no_roles')
-        )
+        try:
+            return set(decoded_token["resource_access"]["account"]["roles"])
+        except KeyError:
+            self.log.error("Failed to retrieve the roles from the token")
+            return set()
 
     def _exchange_tokens(self, token):
 
@@ -189,17 +188,19 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
         user = await super().authenticate(handler, data=data)
         if not user:
             return None
+        user['auth_state']['exchanged_tokens'] = self._exchange_tokens(user['auth_state']['access_token'])
+        # user['admin'] = self._get_admin_from_roles(user['auth_state']['access_token'])
+        user['admin'] = True
+        self.log.info("Authentication Successful for user: %s, admin: %s" % (user['name'], user['admin']))
+        return user
 
-        user_roles = self.get_roles_for_token(user['auth_state']['access_token'])
+    def _get_admin_from_roles(self, token):
+        """
+        Check if the user has the admin role
+        """
+        user_roles: Set[str] = self.get_roles_for_token(token)
         if not self._validate_roles(user_roles):
             return None
-
-        user['auth_state']['exchanged_tokens'] = self._exchange_tokens(user['auth_state']['access_token'])
-
-        user['admin'] = self.admin_role and (self.admin_role in user_roles)
-        self.log.info("Authentication Successful for user: %s, roles: %s, admin: %s" % (user['name'], user_roles, user['admin']))
-
-        return user
 
     async def pre_spawn_start(self, user, spawner):
         if self.pre_spawn_hook:
