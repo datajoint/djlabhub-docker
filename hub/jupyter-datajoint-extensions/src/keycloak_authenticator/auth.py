@@ -6,6 +6,7 @@
 
 """KeyCloakAuthenticator"""
 
+from packaging import version
 from jupyterhub.handlers import LogoutHandler
 from jupyterhub.utils import maybe_future
 from oauthenticator.generic import GenericOAuthenticator
@@ -30,6 +31,7 @@ class KeyCloakLogoutHandler(LogoutHandler):
             self.redirect(redirect_url)
         else:
             await super().get()
+
 
 class KeyCloakAuthenticator(GenericOAuthenticator):
     """KeyCloakAuthenticator based on upstream jupyterhub/oauthenticator"""
@@ -60,7 +62,7 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
     )
 
     admin_role = Unicode(
-        default_value='swan-admins',
+        default_value='admins',
         config=True,
         help="Users with this role login as jupyterhub administrators"
     )
@@ -109,12 +111,33 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             self.log.error("Failure to retrieve the openid configuration")
             raise
 
+        self._jwt_version = version.parse(jwt.__version__)
+
+    def _get_public_key(self) -> str:
+        """
+        Retrieve the public key from the OIDC issuer
+        """
+        if not self.oidc_issuer:
+            raise Exception('No OIDC issuer url provided')
+        try:
+            with request.urlopen('%s/.well-known/openid-configuration' % self.oidc_issuer) as response:
+                data = json.loads(response.read())
+                if "public_key" not in data:
+                    raise Exception('Unable to retrieve public_key from OIDC issuer')
+                return f"-----BEGIN PUBLIC KEY-----\n{data['public_key']}\n-----END PUBLIC KEY-----"
+        except HTTPError:
+            self.log.error("Failed to retrieve the public key from the OIDC issuer")
+            raise
 
     def _validate_roles(self, user_roles):
         return not self.accepted_roles or (self.accepted_roles & user_roles)
 
     def _decode_token(self, token):
-        return jwt.decode(token, verify=False, algorithms='RS256')
+        if self._jwt_version.major >= 2:
+            kw = dict(options=dict(verify_signature=False))
+        else:
+            kw = dict(verify=False)
+        return jwt.decode(token, algorithms='RS256', **kw)
 
     def get_roles_for_token(self, token):
         decoded_token = self._decode_token(token)
