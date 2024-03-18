@@ -65,7 +65,7 @@ c.KeyCloakAuthenticator.scope = ["openid"]
 c.KeyCloakAuthenticator.accepted_roles = set()
 # Specify the role to set a user as admin
 c.KeyCloakAuthenticator.admin_role = 'datajoint'
-c.KeyCloakAuthenticator.admin_groups = ["datajoint"]
+c.KeyCloakAuthenticator.admin_groups = ["dummy_group_name"]
 # Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
 c.KeyCloakAuthenticator.exchange_tokens = []
 
