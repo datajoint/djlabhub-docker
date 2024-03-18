@@ -191,7 +191,12 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
         user['auth_state']['exchanged_tokens'] = self._exchange_tokens(user['auth_state']['access_token'])
         # user['admin'] = self._get_admin_from_roles(user['auth_state']['access_token'])
         self.log.info("Authentication Successful for user: %s, admin: %s" % (user['name'], user['admin']))
+        assert not self.allowed_users, self.allowed_users
         return user
+
+    def check_allowed(self, username, authentication=None):
+        """DEBUG TODO"""
+        return True
 
     def _get_admin_from_roles(self, token):
         """

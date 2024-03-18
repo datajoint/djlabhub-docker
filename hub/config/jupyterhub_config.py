@@ -51,7 +51,8 @@ c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullcha
 
 # Enable the KeyCloak authenticator
 c.JupyterHub.authenticator_class = 'keycloak_authenticator.KeyCloakAuthenticator'
-c.KeyCloakAuthenticator.username_key = 'preferred_username'
+# c.KeyCloakAuthenticator.username_key = 'preferred_username'
+c.KeyCloakAuthenticator.username_claim = "preferred_username"
 c.KeyCloakAuthenticator.logout_redirect_uri = 'https://works-qa.datajoint.io'
 c.KeyCloakAuthenticator.oauth_callback_url = 'https://127.0.0.1:8000/hub/oauth_callback'
 
