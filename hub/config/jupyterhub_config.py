@@ -48,6 +48,9 @@ c.GenericOAuthenticator.scope = ["openid"]
 c.GenericOAuthenticator.claim_groups_key = "groups"
 c.GenericOAuthenticator.admin_groups = ["datajoint"]
 
+# Internal auth expiry
+# c.JupyterHub.cookie_max_age_days = 0.00028 # 1 minute
+
 ## The class to use for spawning single-user servers.
 #
 #          Should be a subclass of :class:`jupyterhub.spawner.Spawner`.
@@ -98,14 +101,11 @@ c.DockerSpawner.environment = {
     "JUPYTER_YDOCEXTENSION_DISABLE_RTC": "TRUE",
 }
 
-# https://github.com/jupyterhub/jupyterhub/issues/3588#issuecomment-1045064784
-# c.JupyterHub.load_roles = [
-#     {
-#         'name': 'server',
-#         'scopes': ['inherit', "access:servers!user", "read:users:activity!user", "users:activity!user", "admin:auth_state!user"]
-#     },
-#     {
-#         'name': 'user',
-#         'scopes': ["self", "admin:auth_state!user"],
-#     }
-# ]
+def auth_state_hook(spawner, auth_state):
+    # print(f"{auth_state=}")
+    spawner.environment['DJ_USER'] = auth_state['oauth_user']['preferred_username']
+    spawner.environment['DJ_PASS'] = auth_state['access_token']
+    spawner.environment['DJ_HOST'] = 'percona-qa.datajoint.io'
+
+# Set profile options
+c.Spawner.auth_state_hook = auth_state_hook
