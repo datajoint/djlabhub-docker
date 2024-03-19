@@ -69,6 +69,7 @@ c.KeyCloakAuthenticator.admin_role = 'datajoint'
 c.KeyCloakAuthenticator.admin_groups = ["dummy_group_name"]
 # Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
 c.KeyCloakAuthenticator.exchange_tokens = []
+c.KeyCloakAuthenticator.allow_all = True
 
 # If your authenticator needs extra configurations, set them in the pre-spawn hook
 def pre_spawn_hook(authenticator, spawner, auth_state):
@@ -140,3 +141,17 @@ c.DockerSpawner.environment = {
 
 # # Set profile options
 # c.Spawner.auth_state_hook = auth_state_hook
+
+c.JupyterHub.load_roles = [
+    {
+        "name": "user",
+        "description": "User Role for accessing auth_state via API",
+        "scopes": ["self", "admin:auth_state!user"],
+        "services": [],
+    }, {
+        "name": "server",
+        "description": "Allows parties to start and stop user servers",
+        "scopes": ["access:servers!user", "read:users:activity!user", "users:activity!user", "admin:auth_state!user"],
+        "services":[]
+    }
+]

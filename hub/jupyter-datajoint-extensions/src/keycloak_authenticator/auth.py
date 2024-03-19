@@ -194,10 +194,6 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
         assert not self.allowed_users, self.allowed_users
         return user
 
-    def check_allowed(self, username, authentication=None):
-        """DEBUG TODO"""
-        return True
-
     def _get_admin_from_roles(self, token):
         """
         Check if the user has the admin role
