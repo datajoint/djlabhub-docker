@@ -1,6 +1,7 @@
 import os
 import pwd
 from traitlets.config import Config
+from keycloak_authenticator import KeyCloakAuthenticator
 
 c = Config() if "c" not in locals() else c
 
@@ -29,9 +30,11 @@ user = [u for u in pwd.getpwall() if u.pw_uid == os.getuid()][0]
 #    - null: jupyterhub.auth.NullAuthenticator
 #    - pam: jupyterhub.auth.PAMAuthenticator
 #  Default: 'jupyterhub.auth.PAMAuthenticator'
-c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
+# c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
 
-# ## TODO - callback_url needs to enable ssl
+## TODO - callback_url needs to enable ssl
+c.JupyterHub.ssl_key = '/etc/letsencrypt/live/fakeservices.datajoint.io/privkey.pem'
+c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullchain.pem'
 # c.JupyterHub.authenticator_class = "oauthenticator.generic.GenericOAuthenticator"
 # c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
 # c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
@@ -45,6 +48,40 @@ c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
 # c.GenericOAuthenticator.scope = ["openid"]
 # c.GenericOAuthenticator.claim_groups_key = "groups"
 # c.GenericOAuthenticator.admin_groups = ["datajoint"]
+
+# Enable the KeyCloak authenticator
+c.JupyterHub.authenticator_class = 'keycloak_authenticator.KeyCloakAuthenticator'
+# c.KeyCloakAuthenticator.username_key = 'preferred_username'
+c.KeyCloakAuthenticator.username_claim = "preferred_username"
+c.KeyCloakAuthenticator.logout_redirect_uri = 'https://works-qa.datajoint.io'
+c.KeyCloakAuthenticator.oauth_callback_url = 'https://127.0.0.1:8000/hub/oauth_callback'
+
+# Specify the issuer url, to get all the endpoints automatically from .well-known/openid-configuration
+c.KeyCloakAuthenticator.oidc_issuer = 'https://keycloak-qa.datajoint.io/realms/datajoint'
+
+# If you need to set a different scope, like adding the offline option for longer lived refresh token
+# c.KeyCloakAuthenticator.scope = ['profile', 'email', 'offline_access']
+c.KeyCloakAuthenticator.scope = ["openid"]
+# Only allow users with this specific roles (none, to allow all)
+c.KeyCloakAuthenticator.accepted_roles = set()
+# Specify the role to set a user as admin
+c.KeyCloakAuthenticator.admin_role = 'datajoint'
+c.KeyCloakAuthenticator.admin_groups = ["dummy_group_name"]
+# Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
+c.KeyCloakAuthenticator.exchange_tokens = []
+c.KeyCloakAuthenticator.allow_all = True
+
+# If your authenticator needs extra configurations, set them in the pre-spawn hook
+def pre_spawn_hook(authenticator, spawner, auth_state):
+    print(f"{auth_state=}")
+    # spawner.environment['ACCESS_TOKEN'] = auth_state['exchanged_tokens']['eos-service']
+    # spawner.environment['OAUTH_INSPECTION_ENDPOINT'] = authenticator.userdata_url.replace('https://', '')
+    # spawner.user_roles = authenticator.get_roles_for_token(auth_state['access_token'])
+    # spawner.user_uid = auth_state['oauth_user']['cern_uid']
+c.KeyCloakAuthenticator.pre_spawn_hook = pre_spawn_hook
+
+# Internal auth expiry
+# c.JupyterHub.cookie_max_age_days = 0.00028 # 1 minute
 
 ## The class to use for spawning single-user servers.
 #
@@ -95,3 +132,26 @@ c.DockerSpawner.environment = {
     "JUPYTER_FILE_CONTENTS_MANAGER_ROOT_DIR": "/home/jovyan",
     "JUPYTER_YDOCEXTENSION_DISABLE_RTC": "TRUE",
 }
+
+# def auth_state_hook(spawner, auth_state):
+#     # print(f"{auth_state=}")
+#     spawner.environment['DJ_USER'] = auth_state['oauth_user']['preferred_username']
+#     spawner.environment['DJ_PASS'] = auth_state['access_token']
+#     spawner.environment['DJ_HOST'] = 'percona-qa.datajoint.io'
+
+# # Set profile options
+# c.Spawner.auth_state_hook = auth_state_hook
+
+c.JupyterHub.load_roles = [
+    {
+        "name": "user",
+        "description": "User Role for accessing auth_state via API",
+        "scopes": ["self", "admin:auth_state!user"],
+        "services": [],
+    }, {
+        "name": "server",
+        "description": "Allows parties to start and stop user servers",
+        "scopes": ["access:servers!user", "read:users:activity!user", "users:activity!user", "admin:auth_state!user"],
+        "services":[]
+    }
+]
