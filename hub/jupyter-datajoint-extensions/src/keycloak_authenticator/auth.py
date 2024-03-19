@@ -210,10 +210,11 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
 
     async def refresh_user(self, user, handler=None):
         """
-            Refresh user's oAuth tokens.
+            Refresh user's OAuth tokens.
             This is called when user info is requested and
             has passed more than "auth_refresh_age" seconds.
         """
+        self.log.info('Refreshing OAuth tokens for user %s' % user.name)
 
         try:
             # Retrieve user authentication info, decode, and check if refresh is needed
@@ -241,7 +242,7 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
                 auth_state['refresh_token'] = refresh_token
                 auth_state['exchanged_tokens'] = self._exchange_tokens(access_token)
 
-                self.log.info('User %s oAuth tokens refreshed' % user.name)
+                self.log.info('User %s OAuth tokens refreshed' % user.name)
                 return {
                     'auth_state': auth_state
                 }
@@ -249,8 +250,8 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
         except HTTPError as e:
             self.log.error("Failure calling the renew endpoint: %s (code: %s)" % (e.read(), e.code))
 
-        except:
-            self.log.error("Failed to refresh the oAuth tokens", exc_info=True)
+        except Exception:
+            self.log.error("Failed to refresh the OAuth tokens", exc_info=True)
 
         return False
 
