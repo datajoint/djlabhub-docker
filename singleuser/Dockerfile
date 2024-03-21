@@ -2,6 +2,7 @@ ARG JUPYTERHUB_VERSION
 FROM quay.io/jupyter/minimal-notebook:hub-${JUPYTERHUB_VERSION}
 
 COPY ./config /tmp/config
+COPY ./ipython-datajoint-creds-updater /tmp/ipython-datajoint-creds-updater
 
 USER root
 RUN \
@@ -17,4 +18,4 @@ RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
-    && pip install -r /tmp/config/pip_requirements.txt
+    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
