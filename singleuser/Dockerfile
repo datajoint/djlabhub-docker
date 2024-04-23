@@ -18,3 +18,6 @@ RUN \
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
     && pip install -r /tmp/config/pip_requirements.txt
+
+COPY ./provisioner/ec2_provisioner.py ./ec2_provisioner.py
+RUN python -c 'from ec2_provisioner import EC2Provisioner'
