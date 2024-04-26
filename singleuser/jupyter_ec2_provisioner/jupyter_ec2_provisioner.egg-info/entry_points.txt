@@ -1,0 +1,2 @@
+[jupyter_client.kernel_provisioners]
+ec2-provisioner = jupyter_ec2_provisioner:EC2Provisioner

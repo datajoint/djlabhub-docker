@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/opt/conda/share/jupyter/kernels/ec2_python/bin/run.sh",
+    "--kernel-id",
+    "{kernel_id}",
+    "--port-range",
+    "{port_range}",
+    "--response-address",
+    "{response_address}",
+    "--public-key",
+    "{public_key}",
+    "--kernel-class-name",
+    "ipykernel.ipkernel.IPythonKernel"
+  ],
+  "env": {},
+  "display_name": "EC2 Kernel",
+  "language": "python",
+  "interrupt_mode": "signal",
+  "metadata": {
+    "kernel_provisioner": {
+      "provisioner_name": "ec2-provisioner",
+      "config": {}
+    }
+  }
+}

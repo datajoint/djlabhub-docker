@@ -19,5 +19,9 @@ RUN \
     # Install dependencies: pip
     && pip install -r /tmp/config/pip_requirements.txt
 
-COPY ./provisioner/ec2_provisioner.py ./ec2_provisioner.py
-RUN python -c 'from ec2_provisioner import EC2Provisioner'
+COPY ./jupyter_ec2_provisioner /tmp/jupyter_ec2_provisioner
+COPY ./jupyter_ec2_provisioner/jupyter_ec2_provisioner/kernel-specs /opt/conda/share/jupyter/kernels
+RUN \
+    # Install jupyter_ec2_provisioner
+    python3 -m pip install /tmp/jupyter_ec2_provisioner \
+    && python3 -c 'from jupyter_ec2_provisioner import EC2Provisioner'

@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: jupyter_ec2_provisioner
+Version: 0.1.0
+Summary: Jupyter EC2 kernel provisioner
+Home-page: 
+Author: 
+Author-email: 
+License: MIT
+Requires-Dist: jupyter_client>=7.1.2

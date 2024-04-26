@@ -1,0 +1,13 @@
+{
+  "argv": ["python", "-m", "ipykernel_launcher", "-f", "{connection_file}"],
+  "env": {},
+  "display_name": "EC2 Kernel",
+  "language": "python",
+  "interrupt_mode": "signal",
+  "metadata": {
+    "kernel_provisioner": {
+      "provisioner_name": "ec2-provisioner",
+      "config": {}
+    }
+  }
+}
