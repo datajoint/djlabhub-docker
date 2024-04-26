@@ -14,12 +14,12 @@ Usage:
            --help
 """
 
-import os
-import boto3
+import sys
 import typer
+from pathlib import Path
 from typing_extensions import Annotated
 from jupyter_ec2_provisioner.boto3_utils import (
-    start_ec2_instance,
+    start_nb_worker,
 )
 
 
@@ -35,9 +35,19 @@ def main(
             help="Enable debugging.", rich_help_panel="Customization and Utils"
         ),
     ] = False,
-
+    userdata_relpath: Annotated[Path, typer.Option(help="Userdata file (path relative to run.py script)")] = Path('../worker-userdata.yaml'),
 ):
-    assert 0, "This is a dummy file. Please run the main script."
+    userdata_path = Path(__file__) / userdata_relpath
+    exit_code: int = start_nb_worker(
+        kernel_id,
+        port_range,
+        response_address,
+        public_key,
+        kernel_class_name,
+        userdata_path,
+        debug
+    )
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
