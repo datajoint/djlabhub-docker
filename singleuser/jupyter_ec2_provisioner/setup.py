@@ -9,7 +9,11 @@ setup(
     author_email="",
     license="MIT",
     packages=["jupyter_ec2_provisioner"],
-    install_requires=["jupyter_client>=7.1.2"],
+    install_requires=[
+        "jupyter_client>=7.1.2",
+        "typer>=0.12.3",
+        "boto3>=1.34.00",
+    ],
     long_description="",
     entry_points={
         "jupyter_client.kernel_provisioners": [

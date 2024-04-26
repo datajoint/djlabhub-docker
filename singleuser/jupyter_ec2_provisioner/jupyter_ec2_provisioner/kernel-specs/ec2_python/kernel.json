@@ -1,6 +1,6 @@
 {
   "argv": [
-    "/opt/conda/share/jupyter/kernels/ec2_python/bin/run.sh",
+    "/opt/conda/share/jupyter/kernels/ec2_python/bin/run.py",
     "--kernel-id",
     "{kernel_id}",
     "--port-range",

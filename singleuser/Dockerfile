@@ -23,5 +23,10 @@ COPY ./jupyter_ec2_provisioner /tmp/jupyter_ec2_provisioner
 COPY ./jupyter_ec2_provisioner/jupyter_ec2_provisioner/kernel-specs /opt/conda/share/jupyter/kernels
 RUN \
     # Install jupyter_ec2_provisioner
-    python3 -m pip install /tmp/jupyter_ec2_provisioner \
-    && python3 -c 'from jupyter_ec2_provisioner import EC2Provisioner'
+    python3 -m pip install /tmp/jupyter_ec2_provisioner && \
+    python3 -c 'from jupyter_ec2_provisioner import EC2Provisioner' && \
+	chown -R jovyan:users /opt/conda/share/jupyter/kernels && \
+	chmod 0755 /opt/conda/share/jupyter/kernels/ec2_python/bin/run.py && \
+    mamba install -y -c conda-forge typer
+USER $NB_UID
+

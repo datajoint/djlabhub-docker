@@ -2,3 +2,4 @@ gh
 jupyter-collaboration
 gateway_provisioners
 boto3
+typer
