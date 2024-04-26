@@ -21,4 +21,5 @@ setup(
         ]
     },
     scripts=[],
+    include_package_data=True,
 )

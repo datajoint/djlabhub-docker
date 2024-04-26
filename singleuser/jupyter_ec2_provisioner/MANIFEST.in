@@ -1,0 +1,3 @@
+recursive-include jupyter_ec2_provisioner/kernel-specs *
+prune */__pycache__
+recursive-exclude */__pycache__ *

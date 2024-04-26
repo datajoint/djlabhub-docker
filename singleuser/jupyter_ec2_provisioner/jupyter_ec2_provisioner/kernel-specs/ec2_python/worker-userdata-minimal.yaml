@@ -1,0 +1,60 @@
+#cloud-config
+
+# logs in  /var/log/cloud-init-output.log
+
+groups:
+  - ubuntu: [root,sys]
+  - docker
+
+users:
+  - default
+  - name: ubuntu
+    gecos: ubuntu
+    shell: /bin/bash
+    primary_group: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: adm, sudo, ubuntu, docker
+    lock_passwd: false
+
+write_files:
+- path: /root/runcmd.sh
+  content: |
+    #!/bin/bash
+    ## Start workers
+    echo "INFO :: Start workers"
+    cd /home/ubuntu/${REPO_NAME}/docker/${WORKER_DOCKER_SUBDIR}
+    docker compose -f ./dist/debian/docker-compose-${WORKER_DOCKER_SUBDIR}.yaml --env-file .env -p ${ORG_NAME}_${WORKFLOW_NAME} up -d
+    docker ps -a
+  owner: root:root
+  permissions: "0700"
+
+runcmd:
+  - bash /root/runcmd.sh
+
+# Need to parametrize like:
+# https://github.com/yambottle/dj-gitops/blob/44066b71f606b88a04cb84bd160c6cad0a855b46/infrastructures/tf/workers_management-wip/worker_template/worker.tf#L71C3-L93C4
+#
+# user_data = templatefile("${path.root}/shared/worker-userdata.yaml",
+#     merge({
+#       ORG_NAME              = var.org_name
+#       WORKFLOW_NAME         = var.workflow_name
+#       REPO_NAME             = var.repo_name
+#       BUCKET_NAME           = var.bucket_name
+#       EFS_ID                = var.efs_id
+#       EFS_AP_ID             = var.efs_ap_id
+#       WORKER_CONTAINER_UID  = each.value.uid
+#       WORKER_CONTAINER_GID  = each.value.gid
+#       IF_PULL_IMAGE         = each.value.if_pull_image
+#       DOCKER_HOST           = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_host}"
+#       DOCKER_USERNAME       = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_username}"
+#       DOCKER_PASSWORD       = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_password}"
+#       WORKFLOW_IMAGE        = "${each.value.if_pull_image}" == "False" ? "" : "${each.value.image_name}:${each.value.image_version}"
+#       MATLAB_LICENSE_BASE64 = each.value.matlab_license_base64
+#    TODO: Needs AWSACCESSKEYID and AWSSECRETACCESSKEY
+#       ENV_FILE              = filebase64("${path.root}/inputs/${var.org_name}_${var.workflow_name}/env/${each.value.worker_name}.env")
+#       WORKER_DOCKER_SUBDIR  = each.value.worker_name
+#       DD_API_KEY            = var.dd_api_key
+#       SCOPE                 = local.tags.Scope
+#       CONTRACT              = local.tags.Contract
+#     })
+#   )
