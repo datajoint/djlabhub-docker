@@ -26,7 +26,6 @@ RUN \
     python3 -m pip install /tmp/jupyter_ec2_provisioner && \
     python3 -c 'from jupyter_ec2_provisioner import EC2Provisioner' && \
 	chown -R jovyan:users /opt/conda/share/jupyter/kernels && \
-	chmod 0755 /opt/conda/share/jupyter/kernels/ec2_python/bin/run.py && \
-    mamba install -y -c conda-forge typer
+	chmod 0755 /opt/conda/share/jupyter/kernels/ec2_python/bin/run.py
 USER $NB_UID
 
