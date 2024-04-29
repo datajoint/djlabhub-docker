@@ -18,13 +18,13 @@ class WorkerSpec(BaseModel):
     Consumed by bootstrap-kernel.sh within the Docker container
     https://github.com/jupyter-server/gateway_provisioners/blob/main/gateway_provisioners/kernel-launchers/bootstrap/bootstrap-kernel.sh
     """
-    port_range: str = "9110..9120"
+    port_range: str = "46000..47000"
     kernel_language: str = "python"
     kernel_id: str
     response_address: str # e.g. "172.27.0.2:8877"
     public_key: str
     # TODO: generate dynamically from port_range
-    port_range_with_dash: str = "9110-9120"
+    port_range_with_dash: str = "46000-47000"
 
 
 class DJHubFetcherResponse(BaseModel):
@@ -124,8 +124,8 @@ def start_nb_worker(
     # Construct UserData
     spec = WorkerSpec(
         # TODO
-        port_range="9110..9120",
-        port_range_with_dash="9110-9120",
+        port_range="46000..47000",
+        port_range_with_dash="46000-47000",
 
         kernel_id=kernel_id,
         response_address=response_address,

@@ -25,7 +25,7 @@ from jupyter_ec2_provisioner.boto3_utils import (
 
 def main(
     kernel_id: Annotated[str, typer.Option(help="Kernel ID. Example: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")] = "",
-    port_range: Annotated[str, typer.Option(help="Port range. Example: 0..0")] = "",
+    port_range: Annotated[str, typer.Option(help="Port range (must be at least 10,000 ports). Example: 46000..47000")] = "",
     response_address: Annotated[str, typer.Option(help="Response address. Example: 172.27.0.2:8877")] = "",
     public_key: Annotated[str, typer.Option(help="Public key. Example: 12345678")] = "",
     kernel_class_name: Annotated[str, typer.Option(help="Kernel class name. Example: ipykernel.ipkernel.IPythonKernel")] = "",
