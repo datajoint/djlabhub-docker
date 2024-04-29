@@ -11,6 +11,91 @@ from jinja2 import Environment, FileSystemLoader
 import logging
 logging.basicConfig(level=logging.INFO)
 
+"""
+TODO: adapt to
+Example body created from AWS console:
+
+{
+  "MaxCount": 1,
+  "MinCount": 1,
+  "ImageId": "ami-xxxxxxxxxxxxxxxxx",
+  "InstanceType": "t2.micro",
+  "EbsOptimized": false,
+  "UserData": "dGhpcyBpcyBteSB1c2VyX2RhdGE=", # "this is my user_data"
+  "BlockDeviceMappings": [
+    {
+      "DeviceName": "/dev/sda1",
+      "Ebs": {
+        "Encrypted": false,
+        "DeleteOnTermination": true,
+        "SnapshotId": "snap-xxxxxxxxxxxxxxxxx",
+        "VolumeSize": 55,
+        "VolumeType": "gp2"
+      }
+    }
+  ],
+  "NetworkInterfaces": [
+    {
+      "SubnetId": "subnet-xxxxxxxxxxxxxxxxx",
+      "AssociatePublicIpAddress": true,
+      "DeviceIndex": 0,
+      "Groups": [
+        "sg-xxxxxxxxxxxxxxxxx"
+      ]
+    }
+  ],
+  "TagSpecifications": [
+    {
+      "ResourceType": "instance",
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "djlabhub-wbn-worker-test"
+        },
+        {
+          "Key": "wbn_kernel_id",
+          "Value": "my_kernel_id"
+        },
+        {
+          "Key": "WorkerType",
+          "Value": "dev:standardworker:stable"
+        }
+      ]
+    },
+    {
+      "ResourceType": "volume",
+      "Tags": [
+        {
+          "Key": "wbn_kernel_id",
+          "Value": "my_kernel_id"
+        },
+        {
+          "Key": "WorkerType",
+          "Value": "dev:standardworker:stable"
+        }
+      ]
+    },
+    {
+      "ResourceType": "network-interface",
+      "Tags": [
+        {
+          "Key": "wbn_kernel_id",
+          "Value": "my_kernel_id"
+        },
+        {
+          "Key": "WorkerType",
+          "Value": "dev:standardworker:stable"
+        }
+      ]
+    }
+  ],
+  "PrivateDnsNameOptions": {
+    "HostnameType": "ip-name",
+    "EnableResourceNameDnsARecord": false,
+    "EnableResourceNameDnsAAAARecord": false
+  }
+}
+"""
 
 
 class WorkerSpec(BaseModel):
@@ -356,90 +441,13 @@ def start_nb_worker(
         logging.error("Exception raised with traceback:\n\n" + traceback.format_exc())
         return 1
     logging.info(f"Instance launched with response:\n{pformat(response)}")
+    # TODO
+    if len(response) > 1:
+        logging.warning("More than one instance launched. Only using the first.")
+    elif len(response) == 0:
+        logging.error("No instances launched.")
+        return 1
+    inst = response[0]
+    if debug or True:
+        logging.info(f"Instance public IP address: {inst.public_ip_address}")
     return 0
-
-"""
-TODO: adapt to
-Example body created from AWS console:
-
-{
-  "MaxCount": 1,
-  "MinCount": 1,
-  "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-  "InstanceType": "t2.micro",
-  "EbsOptimized": false,
-  "UserData": "dGhpcyBpcyBteSB1c2VyX2RhdGE=", # "this is my user_data"
-  "BlockDeviceMappings": [
-    {
-      "DeviceName": "/dev/sda1",
-      "Ebs": {
-        "Encrypted": false,
-        "DeleteOnTermination": true,
-        "SnapshotId": "snap-xxxxxxxxxxxxxxxxx",
-        "VolumeSize": 55,
-        "VolumeType": "gp2"
-      }
-    }
-  ],
-  "NetworkInterfaces": [
-    {
-      "SubnetId": "subnet-xxxxxxxxxxxxxxxxx",
-      "AssociatePublicIpAddress": true,
-      "DeviceIndex": 0,
-      "Groups": [
-        "sg-xxxxxxxxxxxxxxxxx"
-      ]
-    }
-  ],
-  "TagSpecifications": [
-    {
-      "ResourceType": "instance",
-      "Tags": [
-        {
-          "Key": "Name",
-          "Value": "djlabhub-wbn-worker-test"
-        },
-        {
-          "Key": "wbn_kernel_id",
-          "Value": "my_kernel_id"
-        },
-        {
-          "Key": "WorkerType",
-          "Value": "dev:standardworker:stable"
-        }
-      ]
-    },
-    {
-      "ResourceType": "volume",
-      "Tags": [
-        {
-          "Key": "wbn_kernel_id",
-          "Value": "my_kernel_id"
-        },
-        {
-          "Key": "WorkerType",
-          "Value": "dev:standardworker:stable"
-        }
-      ]
-    },
-    {
-      "ResourceType": "network-interface",
-      "Tags": [
-        {
-          "Key": "wbn_kernel_id",
-          "Value": "my_kernel_id"
-        },
-        {
-          "Key": "WorkerType",
-          "Value": "dev:standardworker:stable"
-        }
-      ]
-    }
-  ],
-  "PrivateDnsNameOptions": {
-    "HostnameType": "ip-name",
-    "EnableResourceNameDnsARecord": false,
-    "EnableResourceNameDnsAAAARecord": false
-  }
-}
-"""

@@ -15,6 +15,8 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: adm, sudo, ubuntu, docker
     lock_passwd: false
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCSUA1uv5g/61wzKgQFw1t7WcLvJA6+ThY7xAL+0XGxXykbUHGri3MTegEbfeG5tLJddaoqS9uuqs6Sj8OHWa+DoAYtPnxSdf1xRBAgiQ2uo+b3u6WQIaJOwV4Y5Ul3mXXtRLGXPRN/emI2Z/Rlk3n+zi32OWypnmlgQPR6Gol1Ei/zcI1UfaXNTfPhdHRxPdbd0UmgU5YdmNML7XdH7a2c2O1fHR8yVsNeBjaOJK4qMe/77Vip3gy9XceWc6pMyZRdPJ/xtRaXYxIsc9Ad9a0Y7wFX4mZbwT1PdzVzqp3YSCHN7/afFGaJxU/0mNLM/woLK3uZ506K/vMr23UhllBB
 
 write_files:
 - path: /root/runcmd.sh
