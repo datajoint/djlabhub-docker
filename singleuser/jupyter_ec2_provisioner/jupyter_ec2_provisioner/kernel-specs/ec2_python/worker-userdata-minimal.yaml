@@ -21,10 +21,15 @@ write_files:
   content: |
     #!/bin/bash
     ## Start workers
-    echo "INFO :: Start workers"
-    cd /home/ubuntu/${REPO_NAME}/docker/${WORKER_DOCKER_SUBDIR}
-    docker compose -f ./dist/debian/docker-compose-${WORKER_DOCKER_SUBDIR}.yaml --env-file .env -p ${ORG_NAME}_${WORKFLOW_NAME} up -d
-    docker ps -a
+    echo "INFO :: Start workers" | tee -a /var/log/cloud-init-output.log
+    docker pull datajoint/gp-kernel-py:dev
+    docker run --rm \
+        --expose '{{ port_range }}:{{ port_range }}' \
+        -e KERNEL_LANGUAGE={{ kernel_language }} \
+        -e KERNEL_ID='{{ kernel_id }}' \
+        -e RESPONSE_ADDRESS='{{ response_address }}' \
+        -e PUBLIC_KEY='{{ public_key }}' \
+        datajoint/gp-kernel-py:dev
   owner: root:root
   permissions: "0700"
 

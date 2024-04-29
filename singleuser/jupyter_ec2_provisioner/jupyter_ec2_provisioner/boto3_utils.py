@@ -5,6 +5,7 @@ import botocore
 import traceback
 from dataclasses import dataclass, asdict
 from pprint import pprint
+from .settings import settings
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +26,7 @@ class DJHubFetcherResponse:
     # UserData
     repo_name: str
 
+
 def start_nb_worker(
     kernel_id: str = "",
     port_range: str = "",
@@ -34,7 +36,6 @@ def start_nb_worker(
     userdata_path: Optional[Path] = None,
     debug: bool = False,
     dry_run: bool = True,
-    enable_monitoring: bool = False,
     **boto3_kwargs
 ):
     """
@@ -82,8 +83,10 @@ def start_nb_worker(
         SCOPE                 = local.tags.Scope
         CONTRACT              = local.tags.Contract
     """
+
     # TODO: get DJHubFetcherResponse
     # TODO: template UserData
+    user_data_encoded = ""
 
     client = boto3.resource('ec2')
     # TODO: choose VPC
@@ -100,11 +103,11 @@ def start_nb_worker(
             MinCount=1,
             MaxCount=1,
             # TODO: AMI
-            ImageId='ami-xxxxxxxxxxxxxxxxx',
+            ImageId=settings.default_ami,
             # TODO
-            Monitoring={'Enabled': enable_monitoring},
+            Monitoring={'Enabled': settings.monitoring},
             # TODO
-            InstanceType='t2.micro',
+            InstanceType=settings.default_instance_type,
 
             EbsOptimized=False,
             BlockDeviceMappings=[
@@ -121,11 +124,11 @@ def start_nb_worker(
             ],
             NetworkInterfaces=[
                 {
-                    "SubnetId": "subnet-xxxxxxxxxxxxxxxxx",
+                    "SubnetId": settings.subnet_id,
                     "AssociatePublicIpAddress": True,
                     "DeviceIndex": 0,
                     "Groups": [
-                        "sg-xxxxxxxxxxxxxxxxx"
+                        settings.vpc_security_group_id
                     ]
                 }
             ],
@@ -153,7 +156,7 @@ def start_nb_worker(
             #     'string',
             # ],
             # TODO
-            UserData='string',
+            UserData=user_data_encoded,
             # TODO: needed for UserData?
             # see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html#user-data-shell-scripts
             # IamInstanceProfile={
