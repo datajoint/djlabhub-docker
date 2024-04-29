@@ -67,5 +67,4 @@ class Settings(BaseSettings):
 	default_ami: str = 'ami-0a3a99be3bdbef1f6'
 	default_instance_type: str = 't2.micro'
 
-
 settings = Settings(_env_file='.env')

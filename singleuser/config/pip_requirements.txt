@@ -4,3 +4,4 @@ gateway_provisioners
 boto3
 typer
 pydantic-settings
+Jinja2

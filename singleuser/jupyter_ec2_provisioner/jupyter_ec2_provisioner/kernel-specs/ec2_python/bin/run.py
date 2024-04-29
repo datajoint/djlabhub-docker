@@ -37,14 +37,14 @@ def main(
     ] = False,
     userdata_relpath: Annotated[Path, typer.Option(help="Userdata file (path relative to run.py script)")] = Path('../worker-userdata.yaml'),
 ):
-    userdata_path = Path(__file__) / userdata_relpath
+    user_data_template = Path(__file__).parent / userdata_relpath
     exit_code: int = start_nb_worker(
+        user_data_template,
         kernel_id,
         port_range,
         response_address,
         public_key,
         kernel_class_name,
-        userdata_path,
         debug
     )
     sys.exit(exit_code)

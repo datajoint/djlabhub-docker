@@ -1,17 +1,30 @@
-from typing import Optional
 from pathlib import Path
 import boto3
+import base64
 import botocore
 import traceback
-from dataclasses import dataclass, asdict
+from pydantic import BaseModel
 from pprint import pprint
 from .settings import settings
+import jinja2 as j2
+from jinja2 import Environment, FileSystemLoader
 import logging
 logging.basicConfig(level=logging.INFO)
 
 
-@dataclass
-class DJHubFetcherResponse:
+
+class WorkerSpec(BaseModel):
+    """
+    """
+    # TODO: Provisioner will pass port range like 9110..9120
+    port_range: str = "9110-9120"
+    kernel_language: str = "python"
+    kernel_id: str
+    response_address: str # e.g. "172.27.0.2:8877"
+    public_key: str
+
+
+class DJHubFetcherResponse(BaseModel):
     """
     """
     name: str
@@ -27,13 +40,29 @@ class DJHubFetcherResponse:
     repo_name: str
 
 
+def get_user_data_from_template(
+    template_path: Path,
+    spec: WorkerSpec,
+) -> str:
+    """
+    Uses Jinja2 to render a template UserData file at `template_path`
+    with the WorkerSpec.
+    """
+    env = Environment(loader=FileSystemLoader(template_path.parent))
+    template = env.get_template(template_path.name)
+    doc = template.render(
+        **spec.model_dump()
+    )
+    return doc
+
+
 def start_nb_worker(
+    user_data_template: Path,
     kernel_id: str = "",
     port_range: str = "",
     response_address: str = "",
     public_key: str = "",
     kernel_class_name: str = "",
-    userdata_path: Optional[Path] = None,
     debug: bool = False,
     dry_run: bool = True,
     **boto3_kwargs
@@ -85,8 +114,23 @@ def start_nb_worker(
     """
 
     # TODO: get DJHubFetcherResponse
-    # TODO: template UserData
-    user_data_encoded = ""
+
+    # Construct UserData
+    spec = WorkerSpec(
+        kernel_id=kernel_id,
+        port_range=port_range,
+        response_address=response_address,
+        public_key=public_key
+        # TODO: ports
+        # TODO: KERNEL_LANGUAGE
+    )
+    user_data_str = get_user_data_from_template(
+        user_data_template,
+        spec
+    )
+    user_data_encoded = base64.b64encode(user_data_str.encode()).decode()
+    logging.info(f"Raw user data:\n{user_data_str}")
+    logging.info(f"Encoded user data:\n{user_data_encoded}")
 
     client = boto3.resource('ec2')
     # TODO: choose VPC
