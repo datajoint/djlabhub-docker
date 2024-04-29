@@ -4,7 +4,7 @@ import base64
 import botocore
 import traceback
 from pydantic import BaseModel
-from pprint import pprint
+from pprint import pprint, pformat
 from .settings import settings
 import jinja2 as j2
 from jinja2 import Environment, FileSystemLoader
@@ -351,12 +351,11 @@ def start_nb_worker(
     except botocore.exceptions.ClientError as e:
         if e.response.get('Error', {}).get('Code') == 'DryRunOperation':
             # DryRunOperation: Request would have succeeded, but DryRun flag is set.
-            logging.info("Dry run succeeded")
+            logging.info("Dry run succeeded. Pass dry_run=False to actually launch the instance.")
             return 0
         logging.error("Exception raised with traceback:\n\n" + traceback.format_exc())
         return 1
-    else:
-        pprint(response)
+    logging.info(f"Instance launched with response:\n{pformat(response)}")
     return 0
 
 """
