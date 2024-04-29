@@ -15,13 +15,16 @@ logging.basicConfig(level=logging.INFO)
 
 class WorkerSpec(BaseModel):
     """
+    Consumed by bootstrap-kernel.sh within the Docker container
+    https://github.com/jupyter-server/gateway_provisioners/blob/main/gateway_provisioners/kernel-launchers/bootstrap/bootstrap-kernel.sh
     """
-    # TODO: Provisioner will pass port range like 9110..9120
-    port_range: str = "9110-9120"
+    port_range: str = "9110..9120"
     kernel_language: str = "python"
     kernel_id: str
     response_address: str # e.g. "172.27.0.2:8877"
     public_key: str
+    # TODO: generate dynamically from port_range
+    port_range_with_dash: str = "9110-9120"
 
 
 class DJHubFetcherResponse(BaseModel):
@@ -47,6 +50,9 @@ def get_user_data_from_template(
     """
     Uses Jinja2 to render a template UserData file at `template_path`
     with the WorkerSpec.
+
+    TODO: template from the worker-userdata.yaml like
+    https://github.com/datajoint-company/dj-gitops/blob/2cbb930b30f044a2918311427f3a56ac49acf0ba/infrastructures/tf/workers_management-wip/worker_template/worker.tf#L71
     """
     env = Environment(loader=FileSystemLoader(template_path.parent))
     template = env.get_template(template_path.name)
@@ -117,12 +123,15 @@ def start_nb_worker(
 
     # Construct UserData
     spec = WorkerSpec(
+        # TODO
+        port_range="9110..9120",
+        port_range_with_dash="9110-9120",
+
         kernel_id=kernel_id,
-        port_range=port_range,
         response_address=response_address,
-        public_key=public_key
-        # TODO: ports
-        # TODO: KERNEL_LANGUAGE
+        public_key=public_key,
+        kernel_language="python",
+        # TODO: kernel-class-name
     )
     user_data_str = get_user_data_from_template(
         user_data_template,

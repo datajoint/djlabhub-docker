@@ -24,11 +24,12 @@ write_files:
     echo "INFO :: Start workers" | tee -a /var/log/cloud-init-output.log
     docker pull datajoint/gp-kernel-py:dev
     docker run --rm \
-        --expose '{{ port_range }}' \
+        --expose '{{ port_range_with_dash }}' \
         -e KERNEL_LANGUAGE={{ kernel_language }} \
         -e KERNEL_ID='{{ kernel_id }}' \
         -e RESPONSE_ADDRESS='{{ response_address }}' \
         -e PUBLIC_KEY='{{ public_key }}' \
+        -e PORT_RANGE='{{ port_range }}' \
         datajoint/gp-kernel-py:dev
   owner: root:root
   permissions: "0700"
