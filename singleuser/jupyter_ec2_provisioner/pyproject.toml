@@ -1,0 +1,24 @@
+[project]
+name = "jupyter_ec2_provisioner"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Ethan Ho", email = "53266718+ethho@users.noreply.github.com"},
+]
+readme = "README.md"
+dependencies = [
+	"jupyter_client>=7.1.2",
+	"typer>=0.12.3",
+	"boto3>=1.34.00",
+]
+
+[tool.setuptools]
+include-package-data = true
+packages = ['jupyter_ec2_provisioner']
+
+[project.entry-points."jupyter_client.kernel_provisioners"]
+ec2-provisioner = "jupyter_ec2_provisioner:EC2Provisioner"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
