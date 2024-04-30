@@ -45,6 +45,9 @@ class EC2Provisioner(RemoteProvisionerBase):
 
     @overrides
     async def pre_launch(self, **kwargs: Any) -> dict[str, Any]:
+        # DEBUG: configure response_manager logging
+        self.response_manager.log.setLevel("DEBUG")
+
         # DEBUG: use an existing EC2 instance if set in env
         self.application_id = os.environ.get("GP_EXISTING_EC2_INSTANCE_ID", None)
         if self.application_id is not None:
@@ -64,7 +67,7 @@ class EC2Provisioner(RemoteProvisionerBase):
         # if not available, kernel startup is not attempted
         # self._confirm_yarn_queue_availability(**kwargs)
 
-        self._last_not_found_message = None
+        self._last_not_found_message = 61
 
         return kwargs
 
@@ -676,6 +679,8 @@ class EC2Provisioner(RemoteProvisionerBase):
                 )[0]
                 # Set the assigned ip to the actual host where the application landed.
                 self.assigned_ip = socket.gethostbyname(self.assigned_host)
+                self.logger.info(f"Assigned IP: {self.assigned_ip}")
+                self.logger.info(f"Assigned host: {self.assigned_host}")
 
         return app_state
 
@@ -855,14 +860,16 @@ class EC2Provisioner(RemoteProvisionerBase):
             return
 
         instance = self._get_first_instance(resp, kernel_id)
-        if instance is None and self._last_not_found_message is None:
-            self.log.warning(f"Kernel ID '{kernel_id}' not found in EC2 instances. Continuing...")
-            self._last_not_found_message = True
+        if instance is None:
+            # if self._last_not_found_message > 60:
+            #     self.log.warning(f"Kernel ID '{kernel_id}' not found in EC2 instances. Continuing...")
+            #     self._last_not_found_message = 0
+            # self._last_not_found_message += 1
             return
         # TODO: catch KeyError
         return dict(
             id=instance["InstanceId"],
-            ami=instance.get["ImageId"],
+            ami=instance.get("ImageId"),
             state=instance["State"]["Name"],
         )
 
@@ -929,7 +936,7 @@ class EC2Provisioner(RemoteProvisionerBase):
             self.log.warning(f"Kernel ID '{self.kernel_id}' not found in EC2 instances. Continuing...")
             return
 
-        return dict(
+        d = dict(
             id=instance["InstanceId"],
             ami=instance["ImageId"],
             # example amHostHttpAddress: "host.domain.com:8042"
@@ -937,6 +944,8 @@ class EC2Provisioner(RemoteProvisionerBase):
             public_ip_address=instance.get("PublicIpAddress"),
             state=instance["State"]["Name"],
         )
+        self.logger.info(f"Instance: {d}")
+        return d
 
         # ----------------------------------------------------------------------
         # YARN impl

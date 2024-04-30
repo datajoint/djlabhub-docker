@@ -277,7 +277,11 @@ def start_nb_worker(
                         {
                             "Key": "Name",
                             "Value": "djlabhub-wbn-worker-test"
-                        }
+                        },
+                        {
+                          "Key": "wbn_kernel_id",
+                          "Value": kernel_id,
+                        },
                     ]
                 }
             ],
