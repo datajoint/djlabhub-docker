@@ -7,6 +7,7 @@ import errno
 import signal
 import socket
 import boto3
+import logging
 from gateway_provisioners import RemoteProvisionerBase
 from gateway_provisioners.config_mixin import (
     max_poll_attempts,
@@ -45,9 +46,6 @@ class EC2Provisioner(RemoteProvisionerBase):
 
     @overrides
     async def pre_launch(self, **kwargs: Any) -> dict[str, Any]:
-        # DEBUG: configure response_manager logging
-        self.response_manager.log.setLevel("DEBUG")
-
         # DEBUG: use an existing EC2 instance if set in env
         self.application_id = os.environ.get("GP_EXISTING_EC2_INSTANCE_ID", None)
         if self.application_id is not None:
@@ -679,8 +677,8 @@ class EC2Provisioner(RemoteProvisionerBase):
                 )[0]
                 # Set the assigned ip to the actual host where the application landed.
                 self.assigned_ip = socket.gethostbyname(self.assigned_host)
-                self.logger.info(f"Assigned IP: {self.assigned_ip}")
-                self.logger.info(f"Assigned host: {self.assigned_host}")
+                self.log.debug(f"Assigned IP: {self.assigned_ip}")
+                self.log.debug(f"Assigned host: {self.assigned_host}")
 
         return app_state
 
@@ -944,7 +942,7 @@ class EC2Provisioner(RemoteProvisionerBase):
             public_ip_address=instance.get("PublicIpAddress"),
             state=instance["State"]["Name"],
         )
-        self.logger.info(f"Instance: {d}")
+        self.log.debug(f"Instance: {d}")
         return d
 
         # ----------------------------------------------------------------------
