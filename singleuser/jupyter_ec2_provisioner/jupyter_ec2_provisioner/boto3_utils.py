@@ -155,7 +155,7 @@ def start_nb_worker(
     public_key: str = "",
     kernel_class_name: str = "",
     debug: bool = False,
-    dry_run: bool = True,
+    dry_run: bool = False,
     **boto3_kwargs
 ):
     """
@@ -223,8 +223,8 @@ def start_nb_worker(
         spec
     )
     user_data_encoded = base64.b64encode(user_data_str.encode()).decode()
-    logging.info(f"Raw user data:\n{user_data_str}")
-    logging.info(f"Encoded user data:\n{user_data_encoded}")
+    # logging.info(f"Raw user data:\n{user_data_str}")
+    # logging.info(f"Encoded user data:\n{user_data_encoded}")
 
     client = boto3.resource('ec2')
     # TODO: choose VPC

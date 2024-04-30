@@ -56,15 +56,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 """
 
 class Settings(BaseSettings):
-	vpc_security_group_id: str
-	subnet_id: str
+    vpc_security_group_id: str
+    subnet_id: str
 
-	monitoring: bool = False
-	availability_zone: str = 'us-east-2'
-	# TODO: use AWS_REGION
-	associate_public_ip_address: bool = True
-	enable_volume_tags: bool = False
-	default_ami: str = 'ami-0a3a99be3bdbef1f6'
-	default_instance_type: str = 't2.micro'
+    monitoring: bool = False
+    availability_zone: str = 'us-east-2'
+    # TODO: use AWS_REGION
+    associate_public_ip_address: bool = True
+    enable_volume_tags: bool = False
+    default_ami: str = 'ami-0a3a99be3bdbef1f6'
+    default_instance_type: str = 't2.micro'
+
+    # Not used by the Settings manager, but necessary for
+    # gateway_provisioners.response_manager.ResponseManager
+    gp_response_ip: str = Field(env='GP_RESPONSE_IP')
+    gp_response_port: int = Field(env='GP_RESPONSE_PORT')
+    gp_response_port_retries: int = Field(env='GP_RESPONSE_PORT_RETRIES')
+    gp_response_addr_any: bool = Field(env='GP_RESPONSE_ADDR_ANY')
 
 settings = Settings(_env_file='.env')

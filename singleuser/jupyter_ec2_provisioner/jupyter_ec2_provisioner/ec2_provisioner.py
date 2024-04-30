@@ -64,6 +64,8 @@ class EC2Provisioner(RemoteProvisionerBase):
         # if not available, kernel startup is not attempted
         # self._confirm_yarn_queue_availability(**kwargs)
 
+        self._last_not_found_message = None
+
         return kwargs
 
         # ----------------------------------------------------------------------
@@ -453,7 +455,7 @@ class EC2Provisioner(RemoteProvisionerBase):
     def log_kernel_launch(self, cmd: list[str]) -> None:
         assert self.local_proc is not None
         self.log.info(
-            f"{self.__class__.__name__}: kernel launched. Hostname: {self.assigned_host}, "
+            f"{self.__class__.__name__}: kernel launched. Hostname: {self.assigned_host or None}, "
             f"pid: {self.local_proc.pid}, Kernel ID: {self.kernel_id}, cmd: '{cmd}'"
         )
         return
@@ -853,8 +855,9 @@ class EC2Provisioner(RemoteProvisionerBase):
             return
 
         instance = self._get_first_instance(resp, kernel_id)
-        if instance is None:
+        if instance is None and self._last_not_found_message is None:
             self.log.warning(f"Kernel ID '{kernel_id}' not found in EC2 instances. Continuing...")
+            self._last_not_found_message = True
             return
         # TODO: catch KeyError
         return dict(
