@@ -938,8 +938,8 @@ class EC2Provisioner(RemoteProvisionerBase):
             id=instance["InstanceId"],
             ami=instance["ImageId"],
             # example amHostHttpAddress: "host.domain.com:8042"
-            amHostHttpAddress=instance["PublicDnsName"],
-            public_ip_address=instance.get("PublicIpAddress"),
+            amHostHttpAddress=instance["PrivateDnsName"],
+            # public_ip_address=instance.get("PublicIpAddress"),
             state=instance["State"]["Name"],
         )
         self.log.debug(f"Instance: {d}")
