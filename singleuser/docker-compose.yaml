@@ -9,10 +9,12 @@ services:
     image: datajoint/djlabhub:singleuser-${JUPYTERHUB_VERSION}
     container_name: djlabhub-singleuser
     env_file: .env
-    ports:
-      - $GP_RESPONSE_PORT:$GP_RESPONSE_PORT
-      - $JUPYTER_SERVER_APP_PORT:$JUPYTER_SERVER_APP_PORT
-      - '46000-47000:46000-47000'
+    # see https://github.com/moby/moby/issues/14288#issuecomment-1424015361
+    network_mode: host
+    # ports:
+    #   - '46000-47000:46000-47000'
+    #   - $GP_RESPONSE_PORT:$GP_RESPONSE_PORT
+    #   - $JUPYTER_SERVER_APP_PORT:$JUPYTER_SERVER_APP_PORT
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY

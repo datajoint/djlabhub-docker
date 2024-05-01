@@ -27,7 +27,7 @@ write_files:
     docker pull datajoint/gp-kernel-py:dev
     echo "INFO :: Running docker container with the following command:"
     echo """docker run --rm \
-        --expose '{{ port_range_with_dash }}' \
+        --network host \
         -e KERNEL_LANGUAGE={{ kernel_language }} \
         -e KERNEL_ID='{{ kernel_id }}' \
         -e RESPONSE_ADDRESS='{{ response_address }}' \
@@ -35,7 +35,7 @@ write_files:
         -e PORT_RANGE='{{ port_range }}' \
         datajoint/gp-kernel-py:dev"""
     docker run --rm \
-        --expose '{{ port_range_with_dash }}' \
+        --network host \
         -e KERNEL_LANGUAGE={{ kernel_language }} \
         -e KERNEL_ID='{{ kernel_id }}' \
         -e RESPONSE_ADDRESS='{{ response_address }}' \
