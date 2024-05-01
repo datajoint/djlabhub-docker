@@ -12,6 +12,7 @@ services:
     ports:
       - $GP_RESPONSE_PORT:$GP_RESPONSE_PORT
       - $JUPYTER_SERVER_APP_PORT:$JUPYTER_SERVER_APP_PORT
+      - '46000-47000:46000-47000'
     environment:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
