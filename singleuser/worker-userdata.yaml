@@ -1,0 +1,103 @@
+#cloud-config
+
+# logs in  /var/log/cloud-init-output.log
+
+groups:
+  - ubuntu: [root,sys]
+  - docker
+
+users:
+  - default
+  - name: ubuntu
+    gecos: ubuntu
+    shell: /bin/bash
+    primary_group: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: adm, sudo, ubuntu, docker
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCJtQ+gFsKCSrKaJywLWsmPCcOoJWYzkH1pG5uFyOkmAQsohPzRX9ueMLlIQwCXoxiaOqMCmMsaYtkCE6RQZ1FKdVO/cR/ifsatpHehGuXvtC/ytUK99ve4XE+37zUYUPsBMOteAn1AU5TJjxf7Y2pSy4VwpCyNptCC0cEHM4KWnI/ccq0PvikBh3A4Fb5XKoUf5ORDXjVCqUFwTCBBqYSq6bvpVuLIy6YKgmM4G9mBPNMFZSjOmjztClpUgumhR8tItIPW1C1yaKEZ/N8vwOQ5+pqfR0h4GIhHs6rcNRz9z6W9dWCweEEWsNPSHkRKsjuwzLmqVCASeY797w+qFI1f neuropixel
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5XNTKfwZzj0Jni1q/+Jkvz7a2C2Mp5cmCsq8CynavmHU4ACt/VbsWTP++W09C82Ir0d7u3X695BjCtjx+wuqNSZM+G6fIi8EbbvnLFdY1gOyr33GWiBbPIUnq3/23jNmE16L5Yo5prQgn85wZj9ZniFRdTBu5+ZKILiTklPIjms1LbFw/2yKubyUDmw05mHS2F1QJrt33OGnaRKQY5yyFpAvsHMDlevLRqyrbvJyWolCUSzDOy3lMds04naHOlSt5PTJamoX//cod6MlP1KCqMP5i4qjvzKwDrJ1CJn+cDI0MynlHLYtGDpVEYztGxaAPliQ5ZXyl2KNvXM91D+zHQxN2UAQPw5mgIlZG/jg7/Y1ilDpiofG/ElPWpIE8GMQAiFtJIRGj726aL+EUiBXHeWScb5uoWqqe2tq5XXc2wm1c2NjF8hDBZjXbv4VOEdqhmb1Frh84pqAE4skvemoGC0ojoAg36LhpWjTU8Whz1SEGPHcT1ZlzaFhe6ZJAYV/4n71qpmqoNDmzxa4n429AqPvfEMCDfZkjy6yGMZantv0aMND95Gd1aYtc5SwhZmo2kdtt9dkUyBfm+jaNn4HyyVZVA6v1S3abnGVUfsOR9NqWONeqtmSzP+iV5RaywuBbKr/p82AtSPmnGjxnin/Qvmr18gZT4RzilUikj1m/rQ== dj-ops-tf
+
+write_files:
+- path: /root/runcmd.sh
+  content: |
+    #!/bin/bash
+    echo "INFO :: Setup Datadog Agent"
+    sudo bash /opt/dd_agent_setup/setup_dd_agent.sh ${DD_API_KEY} ${ORG_NAME} ${WORKFLOW_NAME} ${WORKER_DOCKER_SUBDIR}
+
+    ## Mount EFS as outbox
+    echo "INFO :: Mount EFS"
+    sudo bash /mnt/mount_efs_volume/mount_efs_ap.sh ${EFS_ID} ${EFS_AP_ID} /mnt/efs/works
+    [ ! -d "/mnt/efs/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/outbox" ] && sudo mkdir -p /mnt/efs/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/outbox
+
+    # set AWSACCESSKEYID and AWSSECRETACCESSKEY
+    echo -n ${ENV_FILE} | base64 -d > /tmp/.env
+    set -a
+    source /tmp/.env
+    set +a
+
+    ## Mount S3 as inbox(it requires AWSACCESSKEYID and AWSSECRETACCESSKEY)
+    echo "INFO :: Mount S3"
+    sed -i '/user_allow_other/s/^#//g' /etc/fuse.conf
+    [ ! -d "/mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/inbox" ] && sudo mkdir -p /mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/inbox
+    s3fs ${BUCKET_NAME}:/${ORG_NAME}_${WORKFLOW_NAME}/inbox /mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/inbox \
+      -o allow_other,uid=${WORKER_CONTAINER_UID},gid=${WORKER_CONTAINER_GID},createbucket,multipart_size=530,endpoint=us-east-2,default_acl=private,url=http://s3-accelerate.amazonaws.com
+    [ ! -d "/mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/outbox" ] && sudo mkdir -p /mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/outbox
+    s3fs ${BUCKET_NAME}:/${ORG_NAME}_${WORKFLOW_NAME}/outbox /mnt/s3/works/org/${ORG_NAME}/proj/${WORKFLOW_NAME}/outbox \
+      -o allow_other,uid=${WORKER_CONTAINER_UID},gid=${WORKER_CONTAINER_GID},createbucket,multipart_size=530,endpoint=us-east-2,default_acl=private,url=http://s3-accelerate.amazonaws.com
+    df -Th
+
+    ## Docker pull images
+    if [ ${IF_PULL_IMAGE} == "True" ]; then
+      echo "INFO :: Pull workflow image"
+      echo -n ${DOCKER_PASSWORD} | base64 -d | docker login --username ${DOCKER_USERNAME} --password-stdin ${DOCKER_HOST}
+      docker pull ${WORKFLOW_IMAGE}
+    else
+      echo "INFO :: Skip pulling workflow image"
+    fi
+
+    ## MATLAB license
+    if [ ${MATLAB_LICENSE_BASE64} ]; then
+      [[ ! -z "${MATLAB_LICENSE_BASE64}" ]] && mkdir /home/ubuntu/MATLAB_license && echo -n ${MATLAB_LICENSE_BASE64} | base64 -d > /home/ubuntu/MATLAB_license/license.lic
+    fi
+
+    ## Start workers
+    echo "INFO :: Start workers"
+    echo -n ${ENV_FILE} | base64 -d > /home/ubuntu/${REPO_NAME}/docker/${WORKER_DOCKER_SUBDIR}/.env
+    cd /home/ubuntu/${REPO_NAME}/docker/${WORKER_DOCKER_SUBDIR}
+    docker compose -f ./dist/debian/docker-compose-${WORKER_DOCKER_SUBDIR}.yaml --env-file .env -p ${ORG_NAME}_${WORKFLOW_NAME} up -d
+    docker ps -a
+  owner: root:root
+  permissions: "0700"
+
+runcmd:
+  - bash /root/runcmd.sh
+
+# Need to parametrize like:
+# https://github.com/yambottle/dj-gitops/blob/44066b71f606b88a04cb84bd160c6cad0a855b46/infrastructures/tf/workers_management-wip/worker_template/worker.tf#L71C3-L93C4
+#
+# user_data = templatefile("${path.root}/shared/worker-userdata.yaml",
+#     merge({
+#       ORG_NAME              = var.org_name
+#       WORKFLOW_NAME         = var.workflow_name
+#       REPO_NAME             = var.repo_name
+#       BUCKET_NAME           = var.bucket_name
+#       EFS_ID                = var.efs_id
+#       EFS_AP_ID             = var.efs_ap_id
+#       WORKER_CONTAINER_UID  = each.value.uid
+#       WORKER_CONTAINER_GID  = each.value.gid
+#       IF_PULL_IMAGE         = each.value.if_pull_image
+#       DOCKER_HOST           = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_host}"
+#       DOCKER_USERNAME       = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_username}"
+#       DOCKER_PASSWORD       = "${each.value.if_pull_image}" == "False" ? "" : "${var.docker_password}"
+#       WORKFLOW_IMAGE        = "${each.value.if_pull_image}" == "False" ? "" : "${each.value.image_name}:${each.value.image_version}"
+#       MATLAB_LICENSE_BASE64 = each.value.matlab_license_base64
+#    TODO: Needs AWSACCESSKEYID and AWSSECRETACCESSKEY
+#       ENV_FILE              = filebase64("${path.root}/inputs/${var.org_name}_${var.workflow_name}/env/${each.value.worker_name}.env")
+#       WORKER_DOCKER_SUBDIR  = each.value.worker_name
+#       DD_API_KEY            = var.dd_api_key
+#       SCOPE                 = local.tags.Scope
+#       CONTRACT              = local.tags.Contract
+#     })
+#   )
