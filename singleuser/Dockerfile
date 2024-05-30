@@ -1,9 +1,14 @@
 ARG JUPYTERHUB_VERSION
 FROM quay.io/jupyter/minimal-notebook:hub-${JUPYTERHUB_VERSION}
 
-COPY ./config /tmp/config
+ARG PYTHON_VERSION
+RUN if [ "$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" != "${PYTHON_VERSION}" ]; then \
+    echo "Installing python ${PYTHON_VERSION}.." && conda install --quiet --no-pin --yes python=${PYTHON_VERSION}; \
+    else echo "Python version matching"; \
+    fi
 
 USER root
+COPY ./config /tmp/config
 RUN \
     # Install dependencies: apt
     bash /tmp/config/apt_install.sh \
@@ -13,6 +18,7 @@ RUN \
     # Add jupyter*config*.py
     && cp /tmp/config/jupyter*config*.py /etc/jupyter/
 
+USER $NB_UID
 RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
