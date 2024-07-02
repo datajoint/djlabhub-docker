@@ -10,7 +10,7 @@ services:
     container_name: djlabhub-singleuser
     env_file: .env
     ports:
-      - $JUPYTER_SERVER_APP_PORT:$JUPYTER_SERVER_APP_PORT
+      - ${JUPYTER_SERVER_APP_PORT:-8889}:${JUPYTER_SERVER_APP_PORT:-8889}
     volumes:
       - ./config/before_start_hook.sh:/usr/local/bin/before-notebook.d/before_start_hook.sh
       - ./config/jupyter_server_config.py:/etc/jupyter/jupyter_server_config.py
