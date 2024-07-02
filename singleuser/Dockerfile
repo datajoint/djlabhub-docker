@@ -16,7 +16,9 @@ RUN \
     && cp /tmp/config/before_start_hook.sh /usr/local/bin/before-notebook.d/ \
     && chmod +x /usr/local/bin/before-notebook.d/before_start_hook.sh \
     # Add jupyter*config*.py
-    && cp /tmp/config/jupyter*config*.py /etc/jupyter/
+    && cp /tmp/config/jupyter*config*.py /etc/jupyter/ \
+    && mkdir /etc/jupyter/labconfig/ \
+    && cp /tmp/config/*.json /etc/jupyter/labconfig/
 
 USER $NB_UID
 RUN \

@@ -88,7 +88,7 @@ c.FileContentsManager.root_dir = os.getenv(
     "JUPYTER_FILE_CONTENTS_MANAGER_ROOT_DIR", "/home/jovyan"
 )
 
-## Jupyter collaboration extension
-c.YDocExtension.disable_rtc = (
-    os.getenv("JUPYTER_YDOCEXTENSION_DISABLE_RTC", "FALSE").upper() == "TRUE"
-)
+# ## Jupyter collaboration extension
+# c.YDocExtension.disable_rtc = (
+#     os.getenv("JUPYTER_YDOCEXTENSION_DISABLE_RTC", "FALSE").upper() == "TRUE"
+# )
