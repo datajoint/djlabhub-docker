@@ -22,7 +22,7 @@ jobs:
           - py_ver: '3.9'
           - py_ver: '3.8'
     env:
-      PY_VERSION: ${{matrix.py_ver}}
+      PYTHON_VERSION: ${{matrix.py_ver}}
       JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
     steps:
       - uses: actions/checkout@v4
