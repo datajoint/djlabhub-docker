@@ -23,8 +23,8 @@ jobs:
           - py_ver: '3.9'
           - py_ver: '3.8'
     env:
-      PY_VER: ${{matrix.py_ver}}
-      JUPYTERHUB_VER: ${{github.event.inputs.jupyterhub_version}}
+      PY_VERSION: ${{matrix.py_ver}}
+      JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
     steps:
       - uses: actions/checkout@v4
       - name: Login to Docker Hub
