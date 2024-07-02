@@ -33,7 +33,7 @@ jobs:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
       - run: |
-        cd singleuser
-        docker compose build
-        export IMAGE_TAG=$(eval "echo \"$(cat docker-compose.yaml | grep image: | awk '{ print $2 }' | grep singleuser)\"")
-        docker push $IMAGE_TAG
+          cd singleuser
+          docker compose build
+          export IMAGE_TAG=$(eval "echo \"$(cat docker-compose.yaml | grep image: | awk '{ print $2 }' | grep singleuser)\"")
+          docker push $IMAGE_TAG
