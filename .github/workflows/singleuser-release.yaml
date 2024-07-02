@@ -9,7 +9,6 @@ on:
         options:
           - '5.0.0'
           - '4.0.2'
-          - '1.4.2'
 
 jobs:
   release-image:
