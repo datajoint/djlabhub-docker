@@ -114,28 +114,6 @@ c.GenericOAuthenticator.scope = ["openid"]
 c.GenericOAuthenticator.claim_groups_key = "groups"
 c.GenericOAuthenticator.admin_groups = ["datajoint"]
 
-# Enable the KeyCloak authenticator
-# c.JupyterHub.authenticator_class = 'keycloak_authenticator.KeyCloakAuthenticator'
-# c.KeyCloakAuthenticator.username_key = 'preferred_username'
-# c.KeyCloakAuthenticator.username_claim = "preferred_username"
-# c.KeyCloakAuthenticator.logout_redirect_uri = 'https://works-qa.datajoint.io'
-# c.KeyCloakAuthenticator.oauth_callback_url = 'https://127.0.0.1:8000/hub/oauth_callback'
-
-# Specify the issuer url, to get all the endpoints automatically from .well-known/openid-configuration
-# c.KeyCloakAuthenticator.oidc_issuer = 'https://keycloak-qa.datajoint.io/realms/datajoint'
-
-# If you need to set a different scope, like adding the offline option for longer lived refresh token
-# c.KeyCloakAuthenticator.scope = ['profile', 'email', 'offline_access']
-# c.KeyCloakAuthenticator.scope = ["openid"]
-# Only allow users with this specific roles (none, to allow all)
-# c.KeyCloakAuthenticator.accepted_roles = set()
-# Specify the role to set a user as admin
-# c.KeyCloakAuthenticator.admin_role = 'datajoint'
-# c.KeyCloakAuthenticator.admin_groups = ["dummy_group_name"]
-# Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
-# c.KeyCloakAuthenticator.exchange_tokens = []
-# c.KeyCloakAuthenticator.allow_all = True
-
 # If your authenticator needs extra configurations, set them in the pre-spawn hook
 def pre_spawn_hook(authenticator, spawner, auth_state):
     print(f"{auth_state=}")
