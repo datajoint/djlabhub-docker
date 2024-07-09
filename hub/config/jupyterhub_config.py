@@ -121,9 +121,9 @@ c.DockerSpawner.environment = {
     "DOCKER_STACKS_JUPYTER_CMD": "lab",
     ## Extended by Datajoint
     ## Before Start Hook
-    "DJLABHUB_REPO": "https://github.com/datajoint/datajoint-tutorials.git",
-    "DJLABHUB_REPO_BRANCH": "main",
-    "DJLABHUB_REPO_INSTALL": "TRUE",
+    # "DJLABHUB_REPO": "https://github.com/datajoint/datajoint-tutorials.git",
+    # "DJLABHUB_REPO_BRANCH": "main",
+    # "DJLABHUB_REPO_INSTALL": "TRUE",
     ## Jupyter Config
     # "JUPYTER_SERVER_APP_IP": "0.0.0.0",
     # "JUPYTER_SERVER_APP_PASSWORD": "",
