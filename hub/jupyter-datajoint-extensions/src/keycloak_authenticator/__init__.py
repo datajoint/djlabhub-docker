@@ -1,1 +1,1 @@
-from .auth import KeyCloakAuthenticator, KeyCloakLogoutHandler
+from .auth import KeyCloakAuthenticator

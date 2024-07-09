@@ -16,159 +16,9 @@ import jwt, os, pwd, time, json
 from urllib import request, parse
 from urllib.error import HTTPError
 
-class KeyCloakLogoutHandler(LogoutHandler):
-    """Log a user out by clearing both their JupyterHub login cookie and SSO cookie."""
-
-    async def get(self):
-        if self.authenticator.enable_logout:
-            await self.default_handle_logout()
-            await self.handle_logout()
-
-            redirect_url = self.authenticator.end_session_url
-            if self.authenticator.logout_redirect_uri:
-                redirect_url += '?redirect_uri=%s' % self.authenticator.logout_redirect_uri
-
-            self.redirect(redirect_url)
-        else:
-            await super().get()
-
 
 class KeyCloakAuthenticator(GenericOAuthenticator):
     """KeyCloakAuthenticator based on upstream jupyterhub/oauthenticator"""
-
-    oidc_issuer = Unicode(
-        default_value='',
-        config=True,
-        help="OIDC issuer URL for automatic discovery of configuration"
-    )
-
-    enable_logout = Bool(
-        default_value=True,
-        config=True,
-        help="If True, it will logout in SSO."
-    )
-
-    logout_redirect_uri = Unicode(
-        default_value='',
-        config=True,
-        help="URL to invalidate the SSO cookie."
-    )
-
-    accepted_roles = Set (
-        Unicode(),
-        default_value=set(),
-        config=True,
-        help="The role for which the login will be accepted. Default is all roles."
-    )
-
-    admin_role = Unicode(
-        default_value='admins',
-        config=True,
-        help="Users with this role login as jupyterhub administrators"
-    )
-
-    pre_spawn_hook = Any(
-        help="""
-        Function to execute before spawning a session. Usefull to inject extra variables, like the oauth tokens
-        Example::
-            def pre_spawn_hook(authenticator, spawner, auth_state):
-                spawner.environment['ACCESS_TOKEN'] = auth_state['exchanged_tokens']['eos-service']
-            c.KeyCloakAuthenticator.pre_spawn_hook = pre_spawn_hook
-        """
-    ).tag(config=True)
-
-    exchange_tokens = List (
-        Unicode(),
-        default_value=[],
-        config=True,
-        help="List of audiences to exchange our token to"
-    )
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # Force auth state so that we can store the tokens in the user dict
-        self.enable_auth_state = True
-
-        if not self.oidc_issuer:
-            raise Exception('No OIDC issuer url provided')
-
-        self.log.info('Configuring OIDC from %s' % self.oidc_issuer)
-
-        try:
-            with request.urlopen('%s/.well-known/openid-configuration' % self.oidc_issuer) as response:
-                data = json.loads(response.read())
-
-                if not set(['authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'end_session_endpoint']).issubset(data.keys()):
-                    raise Exception('Unable to retrieve OIDC necessary values')
-
-                self.authorize_url = data['authorization_endpoint']
-                self.token_url = data['token_endpoint']
-                self.userdata_url = data['userinfo_endpoint']
-                self.end_session_url = data['end_session_endpoint']
-
-        except HTTPError:
-            self.log.error("Failure to retrieve the openid configuration")
-            raise
-
-        self._jwt_version = version.parse(jwt.__version__)
-
-    def _get_public_key(self) -> str:
-        """
-        Retrieve the public key from the OIDC issuer
-        """
-        if not self.oidc_issuer:
-            raise Exception('No OIDC issuer url provided')
-        try:
-            with request.urlopen('%s/.well-known/openid-configuration' % self.oidc_issuer) as response:
-                data = json.loads(response.read())
-                if "public_key" not in data:
-                    raise Exception('Unable to retrieve public_key from OIDC issuer')
-                return f"-----BEGIN PUBLIC KEY-----\n{data['public_key']}\n-----END PUBLIC KEY-----"
-        except HTTPError:
-            self.log.error("Failed to retrieve the public key from the OIDC issuer")
-            raise
-
-    def _validate_roles(self, user_roles):
-        return not self.accepted_roles or (self.accepted_roles & user_roles)
-
-    def _decode_token(self, token):
-        if self._jwt_version.major >= 2:
-            kw = dict(options=dict(verify_signature=False))
-        else:
-            kw = dict(verify=False)
-        return jwt.decode(token, algorithms='RS256', **kw)
-
-    def get_roles_for_token(self, token) -> set[str]:
-        decoded_token = self._decode_token(token)
-        try:
-            return set(decoded_token["resource_access"]["account"]["roles"])
-        except KeyError:
-            self.log.error("Failed to retrieve the roles from the token")
-            return set()
-
-    def _exchange_tokens(self, token):
-
-        tokens = dict()
-
-        for new_token in self.exchange_tokens:
-
-            values = dict(
-                grant_type = 'urn:ietf:params:oauth:grant-type:token-exchange',
-                client_id = self.client_id,
-                client_secret = self.client_secret,
-                subject_token = token,
-                audience = new_token,
-                requested_token_type = 'urn:ietf:params:oauth:token-type:access_token'
-            )
-            data = parse.urlencode(values).encode('ascii')
-
-            req = request.Request(self.token_url, data)
-            with request.urlopen(req) as response:
-                data = json.loads(response.read())
-                tokens[new_token] = data.get('access_token', None)
-
-        return tokens
 
     def _refresh_token(self, refresh_token):
         values = dict(
@@ -184,29 +34,16 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             data = json.loads(response.read())
             return (data.get('access_token', None), data.get('refresh_token', None))
 
-    async def authenticate(self, handler, data=None):
-        user = await super().authenticate(handler, data=data)
-        if not user:
-            return None
-        user['auth_state']['exchanged_tokens'] = self._exchange_tokens(user['auth_state']['access_token'])
-        # user['admin'] = self._get_admin_from_roles(user['auth_state']['access_token'])
-        self.log.info("Authentication Successful for user: %s, admin: %s" % (user['name'], user['admin']))
-        assert not self.allowed_users, self.allowed_users
-        return user
+    def _decode_token(self, token):
+        if self._jwt_version.major >= 2:
+            kw = dict(options=dict(verify_signature=False))
+        else:
+            kw = dict(verify=False)
+        return jwt.decode(token, algorithms='RS256', **kw)
 
-    def _get_admin_from_roles(self, token):
-        """
-        Check if the user has the admin role
-        """
-        user_roles: set[str] = self.get_roles_for_token(token)
-        if not self._validate_roles(user_roles):
-            return None
-
-    async def pre_spawn_start(self, user, spawner):
-        if self.pre_spawn_hook:
-            auth_state = await user.get_auth_state()
-            await maybe_future(self.pre_spawn_hook(self, spawner, auth_state))
-
+    @property
+    def _jwt_version(self):
+        return version.parse(jwt.__version__)
 
     async def refresh_user(self, user, handler=None):
         """
@@ -240,7 +77,7 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
                 access_token, refresh_token = self._refresh_token(auth_state['refresh_token'])
                 auth_state['access_token'] = access_token
                 auth_state['refresh_token'] = refresh_token
-                auth_state['exchanged_tokens'] = self._exchange_tokens(access_token)
+                # auth_state['exchanged_tokens'] = self._exchange_tokens(access_token)
 
                 self.log.info('User %s OAuth tokens refreshed' % user.name)
                 return {
@@ -254,6 +91,3 @@ class KeyCloakAuthenticator(GenericOAuthenticator):
             self.log.error("Failed to refresh the OAuth tokens", exc_info=True)
 
         return False
-
-    def get_handlers(self, app):
-        return super().get_handlers(app) + [(r'/logout', KeyCloakLogoutHandler)]

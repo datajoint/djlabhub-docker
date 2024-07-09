@@ -35,7 +35,7 @@ user = [u for u in pwd.getpwall() if u.pw_uid == os.getuid()][0]
 ## TODO - callback_url needs to enable ssl
 c.JupyterHub.ssl_key = '/etc/letsencrypt/live/fakeservices.datajoint.io/privkey.pem'
 c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullchain.pem'
-c.JupyterHub.authenticator_class = "oauthenticator.generic.GenericOAuthenticator"
+c.JupyterHub.authenticator_class = "keycloak_authenticator.KeyCloakAuthenticator"
 c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
 c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
 c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
