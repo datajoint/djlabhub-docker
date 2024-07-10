@@ -9,6 +9,7 @@ RUN if [ "$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])
 
 USER root
 COPY ./config /tmp/config
+COPY ./ipython-datajoint-creds-updater /tmp/ipython-datajoint-creds-updater
 RUN \
     # Install dependencies: apt
     bash /tmp/config/apt_install.sh \
@@ -25,4 +26,4 @@ RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
-    && pip install -r /tmp/config/pip_requirements.txt
+    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
