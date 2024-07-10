@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       args:
         - JUPYTERHUB_VERSION
-    image: datajoint/djlabhub:singleuser-${JUPYTERHUB_VERSION:-4.0.2}-py3.10-qa
+    image: datajoint/djlabhub:singleuser-${JUPYTERHUB_VERSION:-4.0.2}
     container_name: djlabhub-singleuser
     env_file: .env
     ports:
