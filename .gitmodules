@@ -1,0 +1,3 @@
+[submodule "singleuser/ipython-datajoint-creds-updater"]
+	path = singleuser/ipython-datajoint-creds-updater
+	url = git@github.com:datajoint-company/ipython-datajoint-creds-updater.git
