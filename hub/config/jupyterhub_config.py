@@ -1,7 +1,14 @@
 import os
 import pwd
+import json
+import jwt
+import time
+from packaging import version
+from oauthenticator.generic import GenericOAuthenticator
+from traitlets import Tuple, Dict
 from traitlets.config import Config
-from keycloak_authenticator import KeyCloakAuthenticator
+from urllib import request, parse
+from urllib.error import HTTPError
 
 c = Config() if "c" not in locals() else c
 
@@ -32,44 +39,80 @@ user = [u for u in pwd.getpwall() if u.pw_uid == os.getuid()][0]
 #  Default: 'jupyterhub.auth.PAMAuthenticator'
 # c.JupyterHub.authenticator_class = "jupyterhub.auth.DummyAuthenticator"
 
+
+class RefreshingAuthenticator(GenericOAuthenticator):
+    """Custom Authenticator that refreshes OAuth tokens when needed."""
+
+    def _refresh_token(self, refresh_token: str) -> Tuple:
+        values = dict(
+            grant_type = 'refresh_token',
+            client_id = self.client_id,
+            client_secret = self.client_secret,
+            refresh_token = refresh_token
+        )
+        data = parse.urlencode(values).encode('ascii')
+
+        req = request.Request(self.token_url, data)
+        with request.urlopen(req) as response:
+            data = json.loads(response.read())
+            return (data.get('access_token', None), data.get('refresh_token', None))
+
+    def _decode_token(self, token: str) -> Dict:
+        if version.parse(jwt.__version__).major >= 2:
+            kw = dict(options=dict(verify_signature=False))
+        else:
+            kw = dict(verify=False)
+        return jwt.decode(token, algorithms='RS256', **kw)
+
+    async def refresh_user(self, user, handler=None):
+        """
+        Refresh user's OAuth tokens. This is called when user info is requested
+        and has passed more than "auth_refresh_age" seconds.
+        """
+        self.log.info('Refreshing OAuth tokens for user %s' % user.name)
+        try:
+            auth_state = await user.get_auth_state()
+            decoded_access_token = self._decode_token(auth_state['access_token'])
+            decoded_refresh_token = self._decode_token(auth_state['refresh_token'])
+            diff_access = decoded_access_token['exp'] - time.time()
+            # If we request the offline_access scope, our refresh token won't have expiration
+            diff_refresh = (decoded_refresh_token['exp'] - time.time()) if 'exp' in decoded_refresh_token else 0
+            if diff_access > self.auth_refresh_age:
+                # Access token is still valid and will stay until next refresh
+                return True
+            elif diff_refresh < 0:
+                # Refresh token not valid, need to re-authenticate again
+                return False
+            else:
+                # We need to refresh access token (which will also refresh the refresh token)
+                access_token, refresh_token = self._refresh_token(auth_state['refresh_token'])
+                auth_state['access_token'] = access_token
+                auth_state['refresh_token'] = refresh_token
+                self.log.debug('User %s OAuth tokens refreshed' % user.name)
+                return {'auth_state': auth_state}
+        except HTTPError as e:
+            self.log.error("Failure calling the renew endpoint: %s (code: %s)" % (e.read(), e.code))
+        except Exception:
+            self.log.error("Failed to refresh the OAuth tokens", exc_info=True)
+        return False
+
+
 ## TODO - callback_url needs to enable ssl
 c.JupyterHub.ssl_key = '/etc/letsencrypt/live/fakeservices.datajoint.io/privkey.pem'
 c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullchain.pem'
-# c.JupyterHub.authenticator_class = "oauthenticator.generic.GenericOAuthenticator"
-# c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
-# c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
-# c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
-# c.GenericOAuthenticator.authorize_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/auth"
-# c.GenericOAuthenticator.token_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/token"
-# c.GenericOAuthenticator.userdata_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/userinfo"
-# c.GenericOAuthenticator.login_service = "Datajoint"
-# c.GenericOAuthenticator.username_claim = "preferred_username"
-# c.GenericOAuthenticator.enable_auth_state = True
-# c.GenericOAuthenticator.scope = ["openid"]
-# c.GenericOAuthenticator.claim_groups_key = "groups"
-# c.GenericOAuthenticator.admin_groups = ["datajoint"]
-
-# Enable the KeyCloak authenticator
-c.JupyterHub.authenticator_class = 'keycloak_authenticator.KeyCloakAuthenticator'
-# c.KeyCloakAuthenticator.username_key = 'preferred_username'
-c.KeyCloakAuthenticator.username_claim = "preferred_username"
-c.KeyCloakAuthenticator.logout_redirect_uri = 'https://works-qa.datajoint.io'
-c.KeyCloakAuthenticator.oauth_callback_url = 'https://127.0.0.1:8000/hub/oauth_callback'
-
-# Specify the issuer url, to get all the endpoints automatically from .well-known/openid-configuration
-c.KeyCloakAuthenticator.oidc_issuer = 'https://keycloak-qa.datajoint.io/realms/datajoint'
-
-# If you need to set a different scope, like adding the offline option for longer lived refresh token
-# c.KeyCloakAuthenticator.scope = ['profile', 'email', 'offline_access']
-c.KeyCloakAuthenticator.scope = ["openid"]
-# Only allow users with this specific roles (none, to allow all)
-c.KeyCloakAuthenticator.accepted_roles = set()
-# Specify the role to set a user as admin
-c.KeyCloakAuthenticator.admin_role = 'datajoint'
-c.KeyCloakAuthenticator.admin_groups = ["dummy_group_name"]
-# Request access tokens for other services by passing their id's (this uses the token exchange mechanism)
-c.KeyCloakAuthenticator.exchange_tokens = []
-c.KeyCloakAuthenticator.allow_all = True
+c.JupyterHub.authenticator_class = RefreshingAuthenticator
+c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
+c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
+c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
+c.GenericOAuthenticator.authorize_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/auth"
+c.GenericOAuthenticator.token_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/token"
+c.GenericOAuthenticator.userdata_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/userinfo"
+c.GenericOAuthenticator.login_service = "Datajoint"
+c.GenericOAuthenticator.username_claim = "preferred_username"
+c.GenericOAuthenticator.enable_auth_state = True
+c.GenericOAuthenticator.scope = ["openid"]
+c.GenericOAuthenticator.claim_groups_key = "groups"
+c.GenericOAuthenticator.admin_groups = ["datajoint"]
 
 # If your authenticator needs extra configurations, set them in the pre-spawn hook
 def pre_spawn_hook(authenticator, spawner, auth_state):
@@ -114,16 +157,16 @@ c.DockerSpawner.start_timeout = 60
 # https://github.com/jupyterhub/jupyterhub/issues/2913#issuecomment-580535422
 c.Spawner.http_timeout = 60
 c.Spawner.start_timeout = 60
-c.DockerSpawner.container_image = "datajoint/djlabhub:singleuser-4.0.2-py3.10-qa"
+c.DockerSpawner.container_image = "datajoint/djlabhub:singleuser-4.0.2-py3.10-creds-updater-0.1.0-qa"
 
 c.DockerSpawner.environment = {
     ## Jupyter Official Environment Variables
     "DOCKER_STACKS_JUPYTER_CMD": "lab",
     ## Extended by Datajoint
     ## Before Start Hook
-    "DJLABHUB_REPO": "https://github.com/datajoint/datajoint-tutorials.git",
-    "DJLABHUB_REPO_BRANCH": "main",
-    "DJLABHUB_REPO_INSTALL": "TRUE",
+    # "DJLABHUB_REPO": "https://github.com/datajoint/datajoint-tutorials.git",
+    # "DJLABHUB_REPO_BRANCH": "main",
+    # "DJLABHUB_REPO_INSTALL": "TRUE",
     ## Jupyter Config
     # "JUPYTER_SERVER_APP_IP": "0.0.0.0",
     # "JUPYTER_SERVER_APP_PASSWORD": "",
