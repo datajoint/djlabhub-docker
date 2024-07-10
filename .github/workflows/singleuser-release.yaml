@@ -34,5 +34,13 @@ jobs:
       - run: |
           cd singleuser
           docker compose build
-          export IMAGE_TAG=$(eval "echo \"$(cat docker-compose.yaml | grep image: | awk '{ print $2 }' | grep singleuser)\"")
-          docker push $IMAGE_TAG
+          export TAG_STUB=$(eval "echo \"$(cat docker-compose.yaml | grep image: | awk '{ print $2 }' | grep singleuser)\"")
+          export TARGET_TAG="${TAG_STUB}-$(git rev-parse --short HEAD)"
+          export LATEST_TAG="${TAG_STUB}-latest"
+          echo "target_tag=${TARGET_TAG}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          docker tag $TAG_STUB $TARGET_TAG
+          docker tag $TAG_STUB $LATEST_TAG
+          docker push $TARGET_TAG
+          docker push $LATEST_TAG
+        id: docker-build
