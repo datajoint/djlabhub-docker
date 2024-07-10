@@ -1,4 +1,4 @@
-name: singleuser-relase
+name: singleuser-release
 on:
   workflow_dispatch:
     inputs:
