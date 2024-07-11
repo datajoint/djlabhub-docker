@@ -15,7 +15,9 @@ if [[ ! -z "${DJLABHUB_REPO}" ]]; then
   git clone $DJLABHUB_REPO $HOME/$REPO_NAME || echo "WARNING::Failed to clone ${DJLABHUB_REPO}. Continuing..."
   if [[ ! -z "${DJLABHUB_REPO_BRANCH}" ]]; then
     echo "INFO::Switch to branch $DJLABHUB_REPO_BRANCH"
-    git -C $HOME/$REPO_NAME switch $DJLABHUB_REPO_BRANCH
+    git -C $HOME/$REPO_NAME switch $DJLABHUB_REPO_BRANCH || echo "WARNING::Failed to checkout branch ${DJLABHUB_REPO_BRANCH}. Continuing..."
+    ls -lah
+    git branch
   fi
 
   if [[ $DJLABHUB_REPO_INSTALL == "TRUE" ]]; then
