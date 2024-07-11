@@ -16,6 +16,7 @@ if [[ ! -z "${DJLABHUB_REPO}" ]]; then
   if [[ ! -z "${DJLABHUB_REPO_BRANCH}" ]]; then
     echo "INFO::Switch to branch $DJLABHUB_REPO_BRANCH"
     git -C $HOME/$REPO_NAME switch $DJLABHUB_REPO_BRANCH || echo "WARNING::Failed to checkout branch ${DJLABHUB_REPO_BRANCH}. Continuing..."
+    cd $HOME/$REPO_NAME
     ls -lah
     git branch
   fi
