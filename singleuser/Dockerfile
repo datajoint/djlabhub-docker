@@ -19,11 +19,14 @@ RUN \
     # Add jupyter*config*.py
     && cp /tmp/config/jupyter*config*.py /etc/jupyter/ \
     && mkdir /etc/jupyter/labconfig/ \
-    && cp /tmp/config/*.json /etc/jupyter/labconfig/
+    && cp /tmp/config/*.json /etc/jupyter/labconfig/ \
+    # Autoload extension in IPython kernel config
+    && mkdir -p /etc/ipython \
+    && echo "c.IPKernelApp.extensions = ['ipython_datajoint_creds_updater.extension']" > /etc/ipython/ipython_kernel_config.py
 
 USER $NB_UID
 RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
-    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
+    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt jupyter_contrib_nbextensions
