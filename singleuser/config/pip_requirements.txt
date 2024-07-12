@@ -1,2 +1,3 @@
 gh
 # jupyter-collaboration
+jupyter-server-proxy
