@@ -29,4 +29,4 @@ RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
-    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt jupyter_contrib_nbextensions
+    && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
