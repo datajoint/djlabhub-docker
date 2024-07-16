@@ -24,11 +24,11 @@ services:
     container_name: theia
     ports:
       - 8080:8080
-    command:
-      - yarn
-      - --cwd=/tmp/theia
-      - theia
-      - start
-      - --plugins=local-dir:plugins
-      - --hostname=0.0.0.0
-      - --port=8080
+    # command:
+    #   - yarn
+    #   - --cwd=/tmp/theia
+    #   - theia
+    #   - start
+    #   - --plugins=local-dir:plugins
+    #   - --hostname=0.0.0.0
+    #   - --port=8080

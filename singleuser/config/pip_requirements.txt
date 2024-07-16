@@ -1,3 +1,5 @@
 gh
 # jupyter-collaboration
 jupyter-server-proxy
+jupyter-theia-proxy
+
