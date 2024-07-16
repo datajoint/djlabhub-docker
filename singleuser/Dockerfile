@@ -10,7 +10,6 @@ RUN if [ "$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])
 USER root
 COPY ./config /tmp/config
 COPY ./ipython-datajoint-creds-updater /tmp/ipython-datajoint-creds-updater
-COPY ./theia/ /tmp/theia
 RUN \
     # Install dependencies: apt
     bash /tmp/config/apt_install.sh \
@@ -24,16 +23,20 @@ RUN \
     # Autoload extension in IPython kernel config
     && mkdir -p /etc/ipython \
     && echo "c.IPKernelApp.extensions = ['ipython_datajoint_creds_updater.extension']" > /etc/ipython/ipython_kernel_config.py
+
+# Install Theia IDE
+COPY ./theia/ /tmp/theia
 RUN \
     cd /tmp/theia \
     && yarn \
-    && yarn theia build
-
+    && yarn theia build \
+    && ln -s /tmp/theia/package.json /home/jovyan/package.json \
+    && ln -s /tmp/theia/src-gen /home/jovyan/src-gen
 ENV PATH="/tmp/theia/node_modules/.bin:${PATH}"
+
 USER $NB_UID
 RUN \
     # remove default work directory
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
     && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
-WORKDIR /tmp/theia
