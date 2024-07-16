@@ -24,6 +24,10 @@ services:
     container_name: theia
     ports:
       - 8080:8080
+    environment:
+      - DJLABHUB_REPO=
+      - DJLABHUB_REPO_BRANCH=
+      - DJLABHUB_REPO_INSTALL=FALSE
     # command:
     #   - yarn
     #   - --cwd=/tmp/theia
