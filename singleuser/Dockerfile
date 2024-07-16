@@ -36,3 +36,4 @@ RUN \
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
     && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
+WORKDIR /tmp/theia
