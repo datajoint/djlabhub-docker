@@ -25,14 +25,15 @@ RUN \
     && echo "c.IPKernelApp.extensions = ['ipython_datajoint_creds_updater.extension']" > /etc/ipython/ipython_kernel_config.py
 
 # Install Theia IDE
-COPY ./theia/ /tmp/theia
+COPY ./theia/ /home/jovyan/.theia
+ENV THEIA_DEFAULT_PLUGINS=local-dir:/home/jovyan/.theia/plugins
 RUN \
-    cd /tmp/theia \
+    cd /home/jovyan/.theia \
     && yarn \
-    && yarn theia build \
-    && ln -s /tmp/theia/package.json /home/jovyan/package.json \
-    && ln -s /tmp/theia/src-gen /home/jovyan/src-gen
-ENV PATH="/tmp/theia/node_modules/.bin:${PATH}"
+    && yarn theia --app-target browser build \
+    && chown -R "$(id -u):$(id -g)" /home/jovyan/.theia \
+    && chmod -R g+rx,u+rwx,o+rwx /home/jovyan/.theia
+ENV PATH="/home/jovyan/.theia/node_modules/.bin:${PATH}"
 
 USER $NB_UID
 RUN \
@@ -40,3 +41,4 @@ RUN \
     [ -d "/home/jovyan/work" ] && rm -r /home/jovyan/work \
     # Install dependencies: pip
     && pip install /tmp/ipython-datajoint-creds-updater -r /tmp/config/pip_requirements.txt
+WORKDIR /home/jovyan/.theia

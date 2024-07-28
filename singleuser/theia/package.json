@@ -17,5 +17,29 @@
   },
   "devDependencies": {
     "@theia/cli": "latest"
-  }
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build && yarn run download:plugins",
+    "clean": "theia --app-target=browser clean",
+    "build": "theia --app-target=browser build",
+    "start": "theia --app-target=browser start --plugins=local-dir:/home/jovyan/.theia/plugins /home/jovyan",
+    "download:plugins": "theia --app-target=browser download:plugins"
+  },
+  "theiaPluginsDir": "plugins",
+  "theiaPlugins": {
+    "vscode-builtin-extensions-pack": "https://open-vsx.org/api/eclipse-theia/builtin-extension-pack/1.50.1/file/eclipse-theia.builtin-extension-pack-1.50.1.vsix",
+    "jupyter-keymap": "https://open-vsx.org/api/ms-toolsai/jupyter/2024.6.0/file/ms-toolsai.jupyter-2024.6.0.vsix",
+    "jupyter-renderers": "https://open-vsx.org/api/ms-toolsai/jupyter/2024.6.0/file/ms-toolsai.jupyter-2024.6.0.vsix",
+    "vscode-jupyter-slideshow": "https://open-vsx.org/api/ms-toolsai/jupyter/2024.6.0/file/ms-toolsai.jupyter-2024.6.0.vsix",
+    "vscode-jupyter-cell-tags": "https://open-vsx.org/api/ms-toolsai/jupyter/2024.6.0/file/ms-toolsai.jupyter-2024.6.0.vsix"
+  },
+  "theiaPluginsExcludeIds": [
+    "ms-vscode.js-debug-companion",
+    "vscode.extension-editing",
+    "vscode.git",
+    "vscode.git-ui",
+    "vscode.github",
+    "vscode.github-authentication",
+    "vscode.microsoft-authentication"
+  ]
 }
