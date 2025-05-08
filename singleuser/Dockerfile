@@ -53,14 +53,10 @@ RUN python setup.py bdist_wheel
 WORKDIR ../..
 
 # code-server install ----
-#TODO: replace by wget already installed in the imag
-RUN curl -fsSL https://code-server.dev/install.sh | sh && \
+RUN wget -qO- https://code-server.dev/install.sh | sh && \
     rm -rf "${HOME}/.cache"
 
-USER $NB_UID
-
 # jupyter-server-proxy + code-server proxy install ----
-USER root
 RUN conda install --quiet --yes \
     'jupyter-server-proxy' && \
     jupyter labextension install @jupyterlab/server-proxy --version latest && \
@@ -74,3 +70,4 @@ RUN conda install --quiet --yes \
 
 WORKDIR $HOME
 RUN touch .gitconfig
+USER $NB_UID

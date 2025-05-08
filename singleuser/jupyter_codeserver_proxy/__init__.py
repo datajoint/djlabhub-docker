@@ -22,7 +22,7 @@ def setup_codeserver():
         dj_user_email = os.getenv("DJ_USER_EMAIL", None)
 
         # # Run Git commands if user information is provided
-        if dj_user is not None and dj_user_email is not None:
+        if dj_user and dj_user_email:
             try:
                 subprocess.run(['git', 'config', '--global', 'user.name', dj_user], check=True)
                 subprocess.run(['git', 'config', '--global', 'user.email', dj_user_email], check=True)
