@@ -7,6 +7,7 @@ for more information.
 import os
 import shutil
 import subprocess
+from .helpers import setup_database_password
 
 def setup_codeserver():
     # Make sure codeserver is in $PATH
@@ -17,6 +18,8 @@ def setup_codeserver():
         working_dir = os.getenv("CODE_WORKINGDIR", None)
         if working_dir is None:
             working_dir = os.getenv("JUPYTER_SERVER_ROOT", ".")
+
+        setup_database_password()
 
         dj_user = os.getenv("DJ_USER", None)
         dj_user_email = os.getenv("DJ_USER_EMAIL", None)
