@@ -2,7 +2,7 @@ services:
   singleuser:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE_NAME:-Dockerfile}
       args:
         - JUPYTERHUB_VERSION
         - PYTHON_VERSION

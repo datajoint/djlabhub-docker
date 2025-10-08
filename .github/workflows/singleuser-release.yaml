@@ -2,6 +2,14 @@ name: singleuser-release
 on:
   workflow_dispatch:
     inputs:
+      dockerfile_name:
+        description: 'Dockerfile to use for the build'
+        required: true
+        default: 'Dockerfile'
+        type: choice
+        options:
+          - 'Dockerfile'
+          - 'DockerfileIDE'
       jupyterhub_version:
         required: true
         default: '4.0.2'
@@ -24,6 +32,7 @@ jobs:
     env:
       PYTHON_VERSION: ${{matrix.py_ver}}
       JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
+      DOCKERFILE_NAME: ${{github.event.inputs.dockerfile_name}}
     steps:
       - uses: actions/checkout@v4
         with:
