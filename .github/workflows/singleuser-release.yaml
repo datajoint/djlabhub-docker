@@ -19,7 +19,8 @@ on:
           - '4.0.2'
 
 jobs:
-  release-image:
+  release-image-matrix:
+    if: github.event.inputs.dockerfile_name == 'Dockerfile'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,16 +44,31 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
-      - run: |
-          cd singleuser
-          docker compose build
-          export TAG_STUB=$(eval "echo \"$(cat docker-compose.yaml | grep image: | awk '{ print $2 }' | grep singleuser)\"")
-          export TARGET_TAG="${TAG_STUB}-$(git rev-parse --short HEAD)"
-          export LATEST_TAG="${TAG_STUB}-latest"
-          echo "target_tag=${TARGET_TAG}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
-          docker tag $TAG_STUB $TARGET_TAG
-          docker tag $TAG_STUB $LATEST_TAG
-          docker push $TARGET_TAG
-          docker push $LATEST_TAG
+      - name: Build and push Docker image
         id: docker-build
+        run: |
+          cd singleuser
+          bash ../.github/scripts/build-and-push.sh
+
+  release-image-ide:
+    if: github.event.inputs.dockerfile_name == 'DockerfileIDE'
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: '3.11'
+      JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
+      DOCKERFILE_NAME: ${{github.event.inputs.dockerfile_name}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          submodules: true
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
+      - name: Build and push Docker image
+        id: docker-build
+        run: |
+          cd singleuser
+          bash ../.github/scripts/build-and-push.sh

@@ -1,7 +1,7 @@
-ARG JUPYTERHUB_VERSION=4.0.2
+ARG JUPYTERHUB_VERSION
 FROM quay.io/jupyter/minimal-notebook:hub-${JUPYTERHUB_VERSION}
 
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION
 RUN if [ "$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')" != "${PYTHON_VERSION}" ]; then \
     echo "Installing python ${PYTHON_VERSION}.." && conda install --quiet --no-pin --yes python=${PYTHON_VERSION}; \
     else echo "Python version matching"; \
