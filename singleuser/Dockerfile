@@ -1,4 +1,3 @@
-
 ARG JUPYTERHUB_VERSION
 FROM quay.io/jupyter/minimal-notebook:hub-${JUPYTERHUB_VERSION}
 
