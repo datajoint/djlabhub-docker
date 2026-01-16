@@ -57,6 +57,7 @@ jobs:
       PYTHON_VERSION: '3.11'
       JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
       DOCKERFILE_NAME: ${{github.event.inputs.dockerfile_name}}
+      IMAGE_SUFFIX: '-ide'
     steps:
       - uses: actions/checkout@v4
         with:
