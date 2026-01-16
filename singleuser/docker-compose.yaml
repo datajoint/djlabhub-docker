@@ -2,11 +2,11 @@ services:
   singleuser:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE_NAME:-Dockerfile}
       args:
         - JUPYTERHUB_VERSION
         - PYTHON_VERSION
-    image: datajoint/djlabhub:singleuser-${JUPYTERHUB_VERSION}-py${PYTHON_VERSION}
+    image: datajoint/djlabhub:singleuser${IMAGE_SUFFIX:-}-${JUPYTERHUB_VERSION}-py${PYTHON_VERSION}
     container_name: djlabhub-singleuser
     env_file: .env
     ports:
@@ -18,4 +18,4 @@ services:
   djlab:
     extends: singleuser
     container_name: djlab
-    image: datajoint/djlab:inherit-hub-${JUPYTERHUB_VERSION}-py${PYTHON_VERSION}
+    image: datajoint/djlab:inherit-hub${IMAGE_SUFFIX:-}-${JUPYTERHUB_VERSION}-py${PYTHON_VERSION}
