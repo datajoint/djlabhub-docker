@@ -101,12 +101,24 @@ class RefreshingAuthenticator(GenericOAuthenticator):
 c.JupyterHub.ssl_key = '/etc/letsencrypt/live/fakeservices.datajoint.io/privkey.pem'
 c.JupyterHub.ssl_cert = '/etc/letsencrypt/live/fakeservices.datajoint.io/fullchain.pem'
 c.JupyterHub.authenticator_class = RefreshingAuthenticator
-c.GenericOAuthenticator.client_id = os.getenv("OAUTH2_CLIENT_ID")
-c.GenericOAuthenticator.client_secret = os.getenv("OAUTH2_CLIENT_SECRET")
-c.GenericOAuthenticator.oauth_callback_url = "https://127.0.0.1:8000/hub/oauth_callback"
-c.GenericOAuthenticator.authorize_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/auth"
-c.GenericOAuthenticator.token_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/token"
-c.GenericOAuthenticator.userdata_url = "https://keycloak-qa.datajoint.io/realms/datajoint/protocol/openid-connect/userinfo"
+c.GenericOAuthenticator.client_id = os.environ["OAUTH2_CLIENT_ID"]
+c.GenericOAuthenticator.client_secret = os.environ["OAUTH2_CLIENT_SECRET"]
+
+# Keycloak host and OAuth callback URL come from environment so the hub image
+# is reusable across environments. Set KEYCLOAK_HOST to the keycloak hostname
+# (e.g. "keycloak.datajoint.com"), no scheme. OAUTH_CALLBACK_URL must be a
+# fully-qualified HTTPS URL.
+#
+# Known residual risks (not yet addressed): verify=False is still in effect
+# on the OAuth callback (see TODO above), and jupyter_codeserver_proxy is on
+# its 1.0b3 beta pin.
+_keycloak_host = os.environ["KEYCLOAK_HOST"]
+_realm_path = "realms/datajoint/protocol/openid-connect"
+c.GenericOAuthenticator.oauth_callback_url = os.environ["OAUTH_CALLBACK_URL"]
+c.GenericOAuthenticator.authorize_url = f"https://{_keycloak_host}/{_realm_path}/auth"
+c.GenericOAuthenticator.token_url = f"https://{_keycloak_host}/{_realm_path}/token"
+c.GenericOAuthenticator.userdata_url = f"https://{_keycloak_host}/{_realm_path}/userinfo"
+c.GenericOAuthenticator.logout_redirect_url = f"https://{_keycloak_host}/{_realm_path}/logout"
 c.GenericOAuthenticator.login_service = "Datajoint"
 c.GenericOAuthenticator.username_claim = "preferred_username"
 c.GenericOAuthenticator.enable_auth_state = True

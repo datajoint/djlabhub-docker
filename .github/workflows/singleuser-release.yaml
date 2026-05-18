@@ -53,8 +53,13 @@ jobs:
   release-image-ide:
     if: github.event.inputs.dockerfile_name == 'IDE.Dockerfile'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - py_ver: '3.11'
+          - py_ver: '3.12'
     env:
-      PYTHON_VERSION: '3.11'
+      PYTHON_VERSION: ${{matrix.py_ver}}
       JUPYTERHUB_VERSION: ${{github.event.inputs.jupyterhub_version}}
       DOCKERFILE_NAME: ${{github.event.inputs.dockerfile_name}}
       IMAGE_SUFFIX: '-ide'

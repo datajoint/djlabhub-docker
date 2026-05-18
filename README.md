@@ -3,6 +3,7 @@
 ## Table of Contents
   - [Introduction](#introduction)
   - [Quick Start](#quick-start)
+  - [Hub configuration env vars](#hub-configuration-env-vars)
   - [Build Jupyterhub Singleuser Image](#build-jupyterhub-singleuser-image)
     - [Configuration](#configuration)
     - [Build](#build)
@@ -22,6 +23,20 @@ Directory explain:
 - `~/legacy` contains the old implementation of the image
 - `~/singleuser` is used to build the jupyterhub profile images
 - `~/hub` is a Docker based jupyterhub host server using DockerSpawner and Docker-in-Docker to launch jupyterhub singleuser server as a Docker container, in order to locally validate the singleuser images for development purpose.(**Don't recommend to use this in production, due to the security concern of Docker-in-Docker**)
+
+
+## Hub configuration env vars
+
+The hub image (`hub/config/jupyterhub_config.py`) requires the following environment variables at startup:
+
+| Env var | Description | Example |
+|---------|-------------|---------|
+| `OAUTH2_CLIENT_ID` | Keycloak client ID | `codebook` |
+| `OAUTH2_CLIENT_SECRET` | Keycloak client secret | (secret) |
+| `KEYCLOAK_HOST` | Keycloak hostname, no scheme | `keycloak.datajoint.com` |
+| `OAUTH_CALLBACK_URL` | Fully-qualified OAuth callback URL | `https://codebook.datajoint.com/hub/oauth_callback` |
+
+The container will fail to start if any of these are unset.
 
 
 ## Build Jupyterhub Singleuser Image
